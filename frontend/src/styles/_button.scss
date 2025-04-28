@@ -1,0 +1,25 @@
+@use "sass:color";
+
+.btn-circle {
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-blue-primary {
+  background-color: #15336e !important;
+  color: #fff !important;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+
+    
+  &:hover {
+    background-color: color.adjust(#1e40af, $lightness: -5%) !important;
+  }
+}
+ 

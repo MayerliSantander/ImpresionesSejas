@@ -1,0 +1,50 @@
+@use "sass:color";
+@use './Header' as *;
+
+.admin-home {
+  background: #f1f1f1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  column-gap: 28px;
+  row-gap: 86px;
+  padding: 2rem;
+  justify-items: center;
+  align-items: start;
+}
+
+.grid-item {
+  width: 100%;
+  max-width: 160px;
+}
+
+.admin-button {
+  aspect-ratio: 1 / 1;
+  background: #15336e;
+  border-radius: 20px;
+  box-shadow: 0 6px 6px rgba(0,0,0,0.25);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+  text-decoration: none;
+
+  .icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &:hover {
+    background: color.adjust(#1e40af, $lightness: -5%);
+    cursor: pointer;
+  }
+}

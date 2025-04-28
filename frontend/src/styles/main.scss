@@ -1,0 +1,14 @@
+@use './_typography.scss';
+@use './_Header.scss';
+@use './_button.scss';
+@use './_pagination.scss';
+@use './_search-bar.scss';
+@use './_table.scss';
+@use './AdminHome.scss';
+@use './LoginPage.scss';
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body {
+  font-family: 'Inter', sans-serif;
+}

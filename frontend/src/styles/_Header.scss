@@ -1,0 +1,10 @@
+.header-navbar {
+  background-color: #141846 !important;
+  height: 78px;
+  display: flex;
+  align-items: center;
+}
+
+#user-nav-dropdown::after {
+  display: none;
+}
