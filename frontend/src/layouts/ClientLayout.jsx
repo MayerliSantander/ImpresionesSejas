@@ -2,10 +2,10 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
 
-export default function AdminLayout() {
+export default function ClientLayout() {
   return (
     <>
-      <Header />
+      <Header role="client" />
       <main>
         <Outlet />
       </main>
