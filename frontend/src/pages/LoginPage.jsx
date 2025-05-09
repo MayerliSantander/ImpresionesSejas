@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logoSrc from '../assets/react.svg';
+import logoSrc from '../assets/impresiones-sejas.png';
 import '../styles/LoginPage.scss';
 import { verifyToken } from '../services/authService';
 import { GoogleLogin } from '@react-oauth/google';
@@ -12,7 +12,7 @@ export default function LoginPage() {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     if (token) {
-      navigate(role === 'admin' ? '/home' : '/home', { replace: true });
+      navigate(role === 'admin' ? '/admin-home' : '/home', { replace: true });
     }
   }, [navigate]);
 
@@ -31,7 +31,6 @@ export default function LoginPage() {
               localStorage.setItem('token', idToken);
 
               const user = await verifyToken(idToken);
-              console.log(user);
               if (user && user.roles && user.roles.length > 0) {
                 const role = user.roles[0].description;
                 localStorage.setItem('role', role);

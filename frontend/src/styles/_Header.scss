@@ -3,8 +3,30 @@
   height: 78px;
   display: flex;
   align-items: center;
+
+  .header-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+
+    .nav-link {
+      padding: 0.5rem 1rem;
+    }
+  }
 }
 
 #user-nav-dropdown::after {
   display: none;
+}
+
+@media (max-width: 576px) {
+  .header-navbar {
+
+    .header-nav {
+
+      .nav-link {
+        text-align: center;
+      }
+    }
+  }
 }

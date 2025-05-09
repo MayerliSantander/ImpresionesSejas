@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import AdminLayout from './layouts/AdminLayout';
 import MaterialsPage from './pages/MaterialsPage';
 import MaterialFormPage from './pages/MaterialFormPage';
 import Home from './pages/Home';
 import ClientLayout from './layouts/ClientLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminLayout from './layouts/AdminLayout';
 
 function App() {
   return (

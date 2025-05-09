@@ -13,7 +13,7 @@ export default function Header({role}) {
       <Navbar.Brand onClick={() => navigate(role === 'admin' ? '/admin-home' : '/home')} style={{ cursor: 'pointer' }}>
         <img src={logoSrc} height="48" alt="Logo Sejas" />
       </Navbar.Brand>
-      <Nav className="ms-auto">
+      <Nav className="header-nav ms-auto">
         {role === 'client' && (
           <Nav.Link onClick={() => navigate('/home/quotes')}>Mis Cotizaciones</Nav.Link>
         )}

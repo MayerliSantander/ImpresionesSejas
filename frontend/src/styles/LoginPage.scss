@@ -14,10 +14,13 @@
       width: 100%;
       text-align: center;
       padding: 2rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
   
       .logo-login {
-        max-width: 312px;
-        height: 137px;
+        max-width: 90%;
+        width: auto;
       }
     }
   
@@ -48,32 +51,19 @@
         }
     }
     @media (min-width: 768px) {
-        flex-direction: row;
-    
-        .login-header {
-          flex: 0 0 40%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          .logo-login {
-            width: auto;
-            height: 50%;
-          }
-        }
-    
-        .login-form-container {
-          flex: 0 0 60%;
-          height: 100%;
-          background-color: rgba(245,245,245,0.6);
-          border-top-left-radius: 1.5rem;
-          border-bottom-left-radius: 1.5rem;
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
-          padding: 4rem 2rem;
-          justify-content: center;
-        }
+      flex-direction: row;
+  
+      .login-form-container {
+        flex: 0 0 60%;
+        height: 100%;
+        background-color: rgba(245,245,245,0.6);
+        border-top-left-radius: 1.5rem;
+        border-bottom-left-radius: 1.5rem;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        padding: 4rem 2rem;
+        justify-content: center;
+      }
     }
 }
   
