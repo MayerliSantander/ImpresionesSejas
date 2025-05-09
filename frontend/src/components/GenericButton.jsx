@@ -26,9 +26,15 @@ export default function GenericButton({
 
   return (
     <button className={btnClass} {...props}>
-      {icon && iconPosition === 'left' && <span className="me-2">{icon}</span>}
-      {children}
-      {icon && iconPosition === 'right' && <span className="ms-2">{icon}</span>}
+      {circle ? (
+        icon
+      ) : (
+        <>
+          {icon && iconPosition === 'left' && <span className="me-2">{icon}</span>}
+          {children}
+          {icon && iconPosition === 'right' && <span className="ms-2">{icon}</span>}
+        </>
+      )}
     </button>
   );
 }

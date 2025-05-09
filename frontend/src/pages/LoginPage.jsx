@@ -12,7 +12,7 @@ export default function LoginPage() {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     if (token) {
-      navigate(role === 'admin' ? '/admin-home' : '/home', { replace: true });
+      navigate(role === 'admin' ? '/home' : '/home', { replace: true });
     }
   }, [navigate]);
 
@@ -35,7 +35,7 @@ export default function LoginPage() {
               if (user && user.roles && user.roles.length > 0) {
                 const role = user.roles[0].description;
                 localStorage.setItem('role', role);
-                navigate(role === 'admin' ? '/admin-home' : '/home', { replace: true });
+                navigate(role === 'admin' ? '/home' : '/home', { replace: true });
               } else {
                 console.error('El usuario no tiene roles definidos:', user);
               }
