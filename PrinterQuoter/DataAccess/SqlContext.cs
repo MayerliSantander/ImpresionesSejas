@@ -10,7 +10,7 @@ public class SqlContext : DbContext
         : base(options)
     { }
     
-    //public DbSet<Activity> Activities { get; set; }
+    public DbSet<Activity> Activities { get; set; }
     //public DbSet<Inventory> Inventories{ get; set; }
     public DbSet<Material> Materials { get; set; }
     //public DbSet<Order> Orders { get; set; }
@@ -27,6 +27,7 @@ public class SqlContext : DbContext
         modelBuilder.ApplyConfiguration(new MaterialConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new ActivityConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }
