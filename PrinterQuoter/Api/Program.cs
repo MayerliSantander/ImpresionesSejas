@@ -42,6 +42,10 @@ builder.Services.AddScoped<IUserUseCase, UserUseCase>();
 
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
+builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<IActivityUseCase, ActivityUseCase>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

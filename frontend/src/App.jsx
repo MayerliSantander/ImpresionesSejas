@@ -7,6 +7,8 @@ import Home from './pages/Home';
 import ClientLayout from './layouts/ClientLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
+import ActivitiesPage from './pages/ActivitiesPage';
+import ActivityFormPage from './pages/ActivityFormPage';
 
 function App() {
   return (
@@ -36,6 +38,9 @@ function App() {
           <Route path='materials' element={<MaterialsPage />} />
           <Route path='materials/new' element={<MaterialFormPage />} />
           <Route path="materials/edit/:id" element={<MaterialFormPage />} />
+          <Route path='activities' element={<ActivitiesPage />} />
+          <Route path='activities/new' element={<ActivityFormPage />} />
+          <Route path="activities/edit/:id" element={<ActivityFormPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
