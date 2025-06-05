@@ -13,6 +13,7 @@ public class ActivityDto
         activity.Id = Guid.NewGuid();
         activity.ActivityName = ActivityName;
         activity.Price = Price;
+        activity.Products = new List<Product>();
         return activity;
     }
 }

@@ -17,6 +17,9 @@ namespace DataAccess.Configurations
 			builder.Property(p => p.Size);
 			builder.Property(p => p.Type);
 			builder.Property(p => p.MaterialPrice);
+			
+			builder.HasMany(p => p.UsedMaterials)
+				.WithOne(p => p.Material);
 		}
 	}
 }
