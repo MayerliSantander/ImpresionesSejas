@@ -46,6 +46,12 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IActivityUseCase, ActivityUseCase>();
 
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductUseCase, ProductUseCase>();
+
+builder.Services.AddScoped<IUsedMaterialRepository, UsedMaterialRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

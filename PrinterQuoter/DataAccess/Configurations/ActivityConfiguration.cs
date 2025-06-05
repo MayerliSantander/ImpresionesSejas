@@ -14,5 +14,8 @@ public class ActivityConfiguration: IEntityTypeConfiguration<Activity>
         builder.Property(p => p.Id).ValueGeneratedOnAdd();
         builder.Property(p => p.ActivityName).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Price).IsRequired();
+        
+        builder.HasMany(p => p.Products)
+            .WithMany(p => p.Activities);
     }
 }
