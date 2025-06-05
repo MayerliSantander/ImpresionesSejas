@@ -9,6 +9,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
 import ActivitiesPage from './pages/ActivitiesPage';
 import ActivityFormPage from './pages/ActivityFormPage';
+import ProductsPage from './pages/ProductsPage';
+import ProductFormPage from './pages/ProductFormPage';
 
 function App() {
   return (
@@ -41,6 +43,9 @@ function App() {
           <Route path='activities' element={<ActivitiesPage />} />
           <Route path='activities/new' element={<ActivityFormPage />} />
           <Route path="activities/edit/:id" element={<ActivityFormPage />} />
+          <Route path='products' element={<ProductsPage />} />
+          <Route path='products/new' element={<ProductFormPage />} />
+          <Route path='products/edit/:id' element={<ProductFormPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
