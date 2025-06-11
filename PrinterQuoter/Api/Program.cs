@@ -4,10 +4,14 @@ using Core.Interfaces.UseCases;
 using DataAccess;
 using DataAccess.Repositories;
 using DataAccess.UseCases;
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Env.Load();
+
 
 // Add services to the container.
 builder.Services.AddAuthorization();
@@ -27,9 +31,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var MySqlVersion = new MySqlServerVersion(new Version(8,0,41));
+
 builder.Services.AddDbContext<SqlContext>(options =>
     {
-        options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), MySqlVersion);
+        options.UseMySql(Environment.GetEnvironmentVariable("CONNECTION_STRING"), MySqlVersion);
     });
 
 builder.Services.AddScoped<IMaterialService, MaterialService>();
@@ -51,6 +56,9 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductUseCase, ProductUseCase>();
 
 builder.Services.AddScoped<IUsedMaterialRepository, UsedMaterialRepository>();
+
+builder.Services.AddScoped<WhatsAppService>();
+builder.Services.AddScoped<IQuotationService, QuotationService>();
 
 var app = builder.Build();
 

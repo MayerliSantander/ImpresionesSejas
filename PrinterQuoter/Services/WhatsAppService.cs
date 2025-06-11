@@ -1,0 +1,38 @@
+using Microsoft.Extensions.Configuration;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
+
+namespace Services;
+
+public class WhatsAppService
+{
+    public WhatsAppService()
+    {
+        TwilioClient.Init(
+            Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID"),
+            Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN")
+        );
+    }
+
+    public async Task<bool> SendQuotation(string phone, string message)
+    {
+        try
+        {
+            var fromNumber = Environment.GetEnvironmentVariable("TWILIO_FROM");
+
+            var result = await MessageResource.CreateAsync(
+                from: new PhoneNumber("whatsapp:" + fromNumber),
+                to: new PhoneNumber("whatsapp:" + phone),
+                body: message
+            );
+
+            return result.ErrorCode == null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[WhatsApp ERROR]{ex.Message} \n{ex.StackTrace}");
+            return false;
+        }
+    }
+}
