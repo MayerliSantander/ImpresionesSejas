@@ -5,14 +5,28 @@ import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInput from './FormInput';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { sendQuotation } from '../services/quotationService';
 
 export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
-  const handleQuoteSubmit = (values, {resetForm}) => {
-    console.log('Cotización enviada con:', { phone: values.phone, bag });
-    alert('Cotización enviada. Nos pondremos en contacto contigo.');
-    resetForm();
-    onClearBag();
-    onClose();
+  const handleQuoteSubmit = async (values, {resetForm}) => {
+    try {
+      const dto = {
+        phone: values.phone,
+        bag: bag.map(item => ({
+          name: item.name,
+          selectedOptions: item.selectedOptions
+        }))
+      };
+      await sendQuotation(dto);
+      console.log('Cotización enviada con:', { phone: values.phone, bag });
+      alert('Cotización enviada. Nos pondremos en contacto contigo.');
+      resetForm();
+      onClearBag();
+      onClose();
+    } catch (error) {
+      console.error('Error al enviar la cotización:', error);
+      alert('Hubo un error al enviar la cotización.');
+    }
   };
 
   const validationSchema = Yup.object().shape({
