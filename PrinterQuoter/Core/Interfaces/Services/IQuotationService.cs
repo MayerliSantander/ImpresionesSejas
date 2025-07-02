@@ -4,6 +4,6 @@ namespace Core.Interfaces.Services;
 
 public interface IQuotationService
 {
-    string BuildQuotationMessage(List<QuotationProductDto> products);
+    Task<string> BuildQuotationDocument(List<QuotationProductDto> products, string clientName);
     decimal SimulatePrice(Dictionary<string, string> options);
 }

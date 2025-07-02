@@ -15,16 +15,20 @@ public class WhatsAppService
         );
     }
 
-    public async Task<bool> SendQuotation(string phone, string message)
+    public async Task<bool> SendQuotationDocument(string phone, string filePath)
     {
         try
         {
             var fromNumber = Environment.GetEnvironmentVariable("TWILIO_FROM");
+            
+            var fileName = Path.GetFileName(filePath);
+            var mediaUrl = new Uri($"https://1ae2-192-223-121-177.ngrok-free.app/public/{fileName}");
 
             var result = await MessageResource.CreateAsync(
                 from: new PhoneNumber("whatsapp:" + fromNumber),
                 to: new PhoneNumber("whatsapp:" + phone),
-                body: message
+                body: "Aquí está tu cotización.",
+                mediaUrl: new List<Uri> { mediaUrl }
             );
 
             return result.ErrorCode == null;

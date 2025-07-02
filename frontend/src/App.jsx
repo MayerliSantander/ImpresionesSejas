@@ -11,6 +11,7 @@ import ActivitiesPage from './pages/ActivitiesPage';
 import ActivityFormPage from './pages/ActivityFormPage';
 import ProductsPage from './pages/ProductsPage';
 import ProductFormPage from './pages/ProductFormPage';
+import TemplateUploadPage from './pages/TemplateUploadPage';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
           <Route path='products' element={<ProductsPage />} />
           <Route path='products/new' element={<ProductFormPage />} />
           <Route path='products/edit/:id' element={<ProductFormPage />} />
+          <Route path='template-upload' element={<TemplateUploadPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

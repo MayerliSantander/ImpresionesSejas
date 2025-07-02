@@ -35,8 +35,8 @@ public class QuotationController: ControllerBase
             if (string.IsNullOrWhiteSpace(request.Phone) || request.Bag == null || !request.Bag.Any()) 
                 return BadRequest("Teléfono y productos requeridos.");
 
-            var message = _quotationService.BuildQuotationMessage(request.Bag);
-            var success = await _whatsAppService.SendQuotation(request.Phone, message); 
+            var path = await _quotationService.BuildQuotationDocument(request.Bag, user.UserName);
+            var success = await _whatsAppService.SendQuotationDocument(request.Phone, path);
 
             if (!success)
                 return StatusCode(500, "No se pudo enviar el mensaje por WhatsApp.");

@@ -26,4 +26,9 @@
       <ProjectReference Include="..\Services\Services.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Generated\" />
+      <Folder Include="Templates\" />
+    </ItemGroup>
+
 </Project>

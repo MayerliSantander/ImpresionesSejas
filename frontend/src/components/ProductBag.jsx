@@ -10,8 +10,11 @@ import { sendQuotation } from '../services/quotationService';
 export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
   const handleQuoteSubmit = async (values, {resetForm}) => {
     try {
+      const username = localStorage.getItem('username');
+
       const dto = {
         phone: values.phone,
+        clientName: username,
         bag: bag.map(item => ({
           name: item.name,
           selectedOptions: item.selectedOptions

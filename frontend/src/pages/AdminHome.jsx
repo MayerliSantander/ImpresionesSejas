@@ -1,8 +1,8 @@
-import React from 'react';
 import {
   FaBox,
   FaClipboardCheck,
   FaClipboardList,
+  FaFileWord,
   FaLayerGroup,
 } from 'react-icons/fa';
 import '../styles/AdminHome.scss';
@@ -13,6 +13,7 @@ const items = [
   { label: 'Material',    icon: <FaLayerGroup /> },
   { label: 'Productos',   icon: <FaBox /> },
   { label: 'Ordenes',     icon: <FaClipboardList /> },
+  { label: 'Plantilla Cotización', icon: <FaFileWord /> },
 ];
 
 export default function AdminHome() {
@@ -36,6 +37,9 @@ export default function AdminHome() {
               }
               if (label === 'Ordenes') {
                 navigate('/admin-home/orders');
+              }
+              if (label === 'Plantilla Cotización') {
+                navigate('/admin-home/template-upload');
               }
             }}
           >
