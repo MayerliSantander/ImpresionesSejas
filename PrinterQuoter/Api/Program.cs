@@ -6,12 +6,12 @@ using DataAccess.Repositories;
 using DataAccess.UseCases;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
-
 
 // Add services to the container.
 builder.Services.AddAuthorization();
@@ -58,7 +58,16 @@ builder.Services.AddScoped<IProductUseCase, ProductUseCase>();
 builder.Services.AddScoped<IUsedMaterialRepository, UsedMaterialRepository>();
 
 builder.Services.AddScoped<WhatsAppService>();
-builder.Services.AddScoped<IQuotationService, QuotationService>();
+
+builder.Services.AddScoped<IQuotationService>(provider => {
+    var env = provider.GetRequiredService<IWebHostEnvironment>();
+    var templatePath = Path.Combine(env.ContentRootPath, "Templates", "plantilla_cotizacion.docx");
+    var outputDir = Path.Combine(env.ContentRootPath, "Generated");
+
+    return new QuotationService(templatePath, outputDir);
+});
+
+builder.Services.AddScoped<ITemplateValidationService, TemplateValidationService>();
 
 var app = builder.Build();
 
@@ -81,6 +90,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowLocalhost");
 app.UseAuthorization();
+app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Generated")),
+    RequestPath = "/public"
+});
 
 //app.Subscribe();
 
