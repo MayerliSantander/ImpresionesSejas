@@ -13,7 +13,12 @@ public class ProductConfiguration: IEntityTypeConfiguration<Product>
         builder.Property(p => p.ProductName).IsRequired();
         builder.Property(p => p.MinimumQuantity).IsRequired();
         builder.Property(p => p.Category).IsRequired();
-        builder.Property(p => p.ImageUrl);
+        builder.Property(p => p.SizeInCm).IsRequired(); 
+        builder.Property(p => p.ImageUrls)
+            .HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+            );
 
         builder.HasMany(p => p.UsedMaterials)
             .WithOne(um => um.Product)

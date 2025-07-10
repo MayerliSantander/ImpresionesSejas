@@ -6,7 +6,8 @@ public class Product
     public string ProductName { get; set; }
     public int MinimumQuantity { get; set; }
     public string Category { get; set; }
-    public string ImageUrl { get; set; }
+    public ICollection<string> ImageUrls { get; set; }
+    public string SizeInCm { get; set; }
     public ICollection<UsedMaterial> UsedMaterials { get; set; }
     public ICollection<Activity> Activities { get; set; }
 }
