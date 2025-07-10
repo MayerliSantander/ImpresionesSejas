@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft, FiTrash2 } from 'react-icons/fi';
 import GenericButton from '../components/GenericButton';
 import FormInput from '../components/FormInput';
 import * as Yup from 'yup';
@@ -14,12 +14,23 @@ export default function ProductFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const validationSchema = Yup.object({
     productName: Yup.string().required('El nombre es obligatorio'),
     minimumQuantity: Yup.number().typeError('Debe ser un número').integer('Debe ser un número entero').min(1, 'Debe ser al menos 1').required('La cantidad mínima es obligatoria'),
     category: Yup.string().required('La categoría es obligatoria'),
-    image: isEdit ? Yup.mixed().nullable() : Yup.mixed().required('La imagen es obligatoria'),
+    sizeInCm: Yup.string().required('El tamaño en cm es obligatorio'),
+    images: Yup.array().test(
+      'at-least-one-image',
+      'Debe subir al menos una imagen',
+      function (images) {
+        const { imageUrls } = this.parent;
+        const hasUploaded = images && images.length > 0;
+        const hasExisting = imageUrls && imageUrls.length > 0;
+        return hasUploaded || hasExisting;
+      }
+    ),
     usedMaterials: Yup.array().of(
       Yup.object().shape({
         materialId: Yup.string().required('Debe seleccionar un material'),
@@ -33,14 +44,16 @@ export default function ProductFormPage() {
     productName: '', 
     minimumQuantity: '',  
     category: '',
-    image: null,
+    sizeInCm: '',
+    images: [],
+    imageUrls: [],
     usedMaterials: [],
     activities: []
   });
 
   const [availableMaterials, setAvailableMaterials] = useState([]);
   const [availableActivities, setAvailableActivities] = useState([]);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewImages, setPreviewImages] = useState([]);
 
   useEffect(() => {
     const fetchMaterials = async () => {
@@ -80,12 +93,13 @@ export default function ProductFormPage() {
           productName: data.productName, 
           minimumQuantity: data.minimumQuantity,
           category: data.category,
+          sizeInCm: data.sizeInCm,
           usedMaterials: enrichedMaterials,
           activities: data.activityIds || [],
-          image: null,
-          imageUrl: data.imageUrl || null
+          images: [],
+          imageUrls: data.imageUrls || []
         });
-        setPreviewImage(data.imageUrl || null);
+        setPreviewImages(data.imageUrls || []);
       });
     }
   }, [availableMaterials, id, isEdit]);
@@ -93,17 +107,20 @@ export default function ProductFormPage() {
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     setSubmitting(true);
     try {
-      let finalImageUrl = values.imageUrl;
+      let finalImageUrls = values.imageUrls
 
-      if (values.image) {
-        finalImageUrl = await cloudinaryService.uploadImage(values.image);
+      if (values.images && values.images.length > 0) {
+        const uploadPromises = values.images.map(file => cloudinaryService.uploadImage(file));
+        const uploadedUrls = await Promise.all(uploadPromises);
+        finalImageUrls = [...finalImageUrls, ...uploadedUrls];
       }
 
       const payload = {
         productName: values.productName,
         minimumQuantity: values.minimumQuantity,
         category: values.category,
-        imageUrl: finalImageUrl,
+        sizeInCm: values.sizeInCm,
+        imageUrls: finalImageUrls,
         activityIds: values.activities,
         usedMaterials: values.usedMaterials.map(m => ({
           materialId: m.materialId,
@@ -114,6 +131,7 @@ export default function ProductFormPage() {
       else await createProduct(payload);
       navigate('/admin-home/products');
     } catch (error) {
+      setErrorMessage('Ocurrió un error al guardar el producto. Por favor, revisa los campos e inténtalo de nuevo.');
       setErrors({ submit: error.message || 'Error al guardar' });
     } finally {
       setSubmitting(false);
@@ -139,48 +157,81 @@ export default function ProductFormPage() {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ values, setFieldValue, isSubmitting, errors, touched }) => (
+        {({ values, setFieldValue, isSubmitting, errors }) => (
           <Form noValidate>
             <FormInput
               label="Nombre"
               name="productName"
-              placeholder="Ingrese el nombre del producto"
-            />
-            <FormInput 
-              label="Cantidad mínima" 
-              name="minimumQuantity" 
-              type="number" 
-              min="1" 
-              placeholder="Ingrese cantidad mínima" 
-            />
-            <FormInput 
-              label="Categoría" 
-              name="category" 
-              placeholder="Ingrese la categoría" 
-            />
+              placeholder="Ingrese el nombre del producto" />
+            <FormInput
+              label="Cantidad mínima"
+              name="minimumQuantity"
+              type="number"
+              min="1"
+              placeholder="Ingrese cantidad mínima" />
+            <FormInput
+              label="Categoría"
+              name="category"
+              placeholder="Ingrese la categoría" />
+            <FormInput
+              label="Tamaño (cm)"
+              name="sizeInCm"
+              placeholder="Ej: 9x5" />
 
             <div className="mb-3">
-              <label className="form-label">Imagen</label>
+              <label className="form-label">Imágenes</label>
               <input
                 type="file"
                 className="form-control"
                 accept="image/*"
+                multiple
                 onChange={(e) => {
-                  const file = e.target.files[0];
-                  setFieldValue('image', file);
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => setPreviewImage(reader.result);
-                    reader.readAsDataURL(file);
-                  }
-                }}
-              />
-              {previewImage && (
-                <img src={previewImage} alt="preview" className="mt-2 img-thumbnail" style={{ maxHeight: '200px' }} />
-              )}
-              {touched.image && errors.image && (
+                  const files = Array.from(e.target.files);
+                  const previews = files.map(file => ({
+                    file,
+                    previewUrl: URL.createObjectURL(file)
+                  }));
+                  setPreviewImages(prev => [...prev, ...previews]);
+                  setFieldValue('images', [...(values.images || []), ...files]);
+                } } />
+              <div className="mt-3 d-flex flex-wrap gap-2">
+                {previewImages.map((image, index) => (
+                  <div key={index} className="position-relative">
+                    <img
+                      src={image.previewUrl || image}
+                      alt="preview"
+                      className="img-thumbnail"
+                      style={{ width: 160, height: 160, objectFit: 'cover' }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-danger position-absolute top-0 end-0"
+                      style={{ borderRadius: '50%', padding: '0.25rem 0.5rem' }}
+                      onClick={() => {
+                        const updatedPreviews = [...previewImages];
+                        updatedPreviews.splice(index, 1);
+                        setPreviewImages(updatedPreviews);
+
+                        const updatedImages = [...(values.images || [])];
+                        updatedImages.splice(index, 1);
+                        setFieldValue('images', updatedImages);
+
+                        const isFromUrls = typeof (image.previewUrl || image) === 'string' && !(image.file);
+                        if (isFromUrls) {
+                          const updatedUrls = [...values.imageUrls];
+                          updatedUrls.splice(index, 1);
+                          setFieldValue('imageUrls', updatedUrls);
+                        }
+                      }}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {errors.images && (
                 <div className="text-danger mt-1" style={{ fontSize: '0.875em' }}>
-                  {errors.image}
+                  {errors.images}
                 </div>
               )}
             </div>
@@ -210,7 +261,7 @@ export default function ProductFormPage() {
                   });
 
                   setFieldValue('usedMaterials', merged);
-                }}
+                } }
               >
                 {availableMaterials.map(mat => (
                   <option key={mat.id} value={mat.id}>{mat.materialName}</option>
@@ -230,10 +281,7 @@ export default function ProductFormPage() {
                         min="1"
                         placeholder="Cantidad"
                         value={values.usedMaterials[index].quantity}
-                        onChange={(e) =>
-                          setFieldValue(`usedMaterials[${index}].quantity`, parseFloat(e.target.value))
-                        }
-                      />
+                        onChange={(e) => setFieldValue(`usedMaterials[${index}].quantity`, parseFloat(e.target.value))} />
                       {errors.usedMaterials?.[index]?.quantity && (
                         <div className="invalid-feedback d-block">
                           {errors.usedMaterials[index].quantity}
@@ -242,7 +290,7 @@ export default function ProductFormPage() {
                     </div>
                     <button type="button" className="btn btn-outline-danger btn-sm mt-1" onClick={() => remove(index)}>X</button>
                   </div>
-                  
+
                 ))
               )}
             </FieldArray>
@@ -266,8 +314,7 @@ export default function ProductFormPage() {
                       } else {
                         setFieldValue('activities', values.activities.filter(a => a !== act.id));
                       }
-                    }}
-                  />
+                    } } />
                   <label className="form-check-label" htmlFor={act.id}>{act.activityName}</label>
                 </div>
               ))}
@@ -277,13 +324,12 @@ export default function ProductFormPage() {
                 </div>
               )}
             </div>
-
-            {errors.submit && <div className="alert alert-danger">{errors.submit}</div>}
+            {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
             <div className="d-flex gap-2">
               <GenericButton type="submit" variant="blue-primary" disabled={isSubmitting}>
                 Aceptar
               </GenericButton>
-              <GenericButton variant="outline-secondary" onClick={() => navigate(-1)}>
+              <GenericButton variant="outline-secondary" onClick={() => { navigate(-1); } }>
                 Cancelar
               </GenericButton>
             </div>

@@ -73,7 +73,8 @@ public class ProductService: IProductService
         product.ProductName = productDto.ProductName;
         product.MinimumQuantity = productDto.MinimumQuantity;
         product.Category = productDto.Category;
-        product.ImageUrl = productDto.ImageUrl;
+        product.SizeInCm = productDto.SizeInCm;
+        product.ImageUrls = productDto.ImageUrls ?? new List<string>();
 
         var existingUsedMaterials = product.UsedMaterials.ToList();
         var usedMaterialsToMatch = productDto.UsedMaterials.ToList();

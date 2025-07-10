@@ -7,7 +7,8 @@ public class ProductDto
     public string ProductName { get; set; }
     public int MinimumQuantity { get; set; }
     public string Category { get; set; }
-    public string ImageUrl { get; set; }
+    public List<string> ImageUrls { get; set; }
+    public string SizeInCm { get; set; }
     public List<Guid> ActivityIds { get; set; }
     public List<UsedMaterialDto> UsedMaterials { get; set; }
     
@@ -18,7 +19,8 @@ public class ProductDto
         product.ProductName = ProductName;
         product.MinimumQuantity = MinimumQuantity;
         product.Category = Category;
-        product.ImageUrl = ImageUrl;
+        product.ImageUrls = ImageUrls ?? new List<string>();
+        product.SizeInCm = SizeInCm;
         product.UsedMaterials = new List<UsedMaterial>();
         product.Activities = new List<Activity>();
         return product;
@@ -31,7 +33,8 @@ public class ProductDto
             ProductName = product.ProductName,
             MinimumQuantity = product.MinimumQuantity,
             Category = product.Category,
-            ImageUrl = product.ImageUrl,
+            ImageUrls = product.ImageUrls?.ToList() ?? new List<string>(),
+            SizeInCm = product.SizeInCm,
             ActivityIds = product.Activities?.Select(a => a.Id).ToList() ?? new List<Guid>(),
             UsedMaterials = product.UsedMaterials?.Select(um => new UsedMaterialDto
             {

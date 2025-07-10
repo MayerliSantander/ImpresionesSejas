@@ -55,6 +55,11 @@ public class ProductController: ControllerBase
 
         try
         {
+            if (productDto.ImageUrls == null || !productDto.ImageUrls.Any())
+            {
+                return BadRequest("Debe proporcionar al menos una URL de imagen.");
+            }
+            
             var result = await _service.CreateProduct(productDto);
             return Ok(result);
         }
@@ -72,6 +77,12 @@ public class ProductController: ControllerBase
         {
             return Unauthorized();
         }
+        
+        if (productDto.ImageUrls == null || !productDto.ImageUrls.Any())
+        {
+            return BadRequest("Debe proporcionar al menos una URL de imagen.");
+        }
+        
         var result = await _service.UpdateProduct(idProduct, productDto);
         return Ok(result);
     }
