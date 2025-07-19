@@ -31,6 +31,34 @@ public class ProductController: ControllerBase
         var products = await _service.GetAllProducts();
         return Ok(products);
     }
+    
+    [HttpGet("category/{category}")]
+    public async Task<IActionResult> GetProductsByCategory(string category)
+    {
+        User user = await Authentication.CurrentUser(Request.Headers["Authorization"], _userService);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var products = await _service.GetProductsByCategory(category);
+        if (products == null || !products.Any())
+        {
+            return NotFound("No se encontraron productos para esta categoría.");
+        }
+        return Ok(products);
+    }
+    
+    [HttpGet("categories")]
+    public async Task<IActionResult> GetCategories()
+    {
+        User user = await Authentication.CurrentUser(Request.Headers["Authorization"], _userService);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var categories = await _service.GetCategories();
+        return Ok(categories);
+    }
 
     [HttpGet("{idProduct}")]
     public async Task<IActionResult> GetById([Required] Guid idProduct)

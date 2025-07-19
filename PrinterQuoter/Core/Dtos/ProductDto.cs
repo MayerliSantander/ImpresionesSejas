@@ -9,6 +9,7 @@ public class ProductDto
     public string Category { get; set; }
     public List<string> ImageUrls { get; set; }
     public string SizeInCm { get; set; }
+    public string Description { get; set; }
     public List<Guid> ActivityIds { get; set; }
     public List<UsedMaterialDto> UsedMaterials { get; set; }
     
@@ -21,6 +22,7 @@ public class ProductDto
         product.Category = Category;
         product.ImageUrls = ImageUrls ?? new List<string>();
         product.SizeInCm = SizeInCm;
+        product.Description = Description;
         product.UsedMaterials = new List<UsedMaterial>();
         product.Activities = new List<Activity>();
         return product;
@@ -35,6 +37,7 @@ public class ProductDto
             Category = product.Category,
             ImageUrls = product.ImageUrls?.ToList() ?? new List<string>(),
             SizeInCm = product.SizeInCm,
+            Description = product.Description,
             ActivityIds = product.Activities?.Select(a => a.Id).ToList() ?? new List<Guid>(),
             UsedMaterials = product.UsedMaterials?.Select(um => new UsedMaterialDto
             {

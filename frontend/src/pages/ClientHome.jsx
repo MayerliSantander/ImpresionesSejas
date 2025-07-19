@@ -1,62 +1,78 @@
-import React from 'react';
-import CatalogCarousel from '../components/CatalogCarousel';
-import trjSrc from '../assets/trj.svg';
-import invSrc from '../assets/inv.svg';
-import volSrc from '../assets/vol.svg';
-
-const categories = [
-  {
-    id: 'papeleria',
-    name: 'Papelería Comercial',
-    products: [
-      {
-        id: 1,
-        name: 'Tarjetas de Presentación',
-        image: trjSrc,
-        options: {
-          Tamaño: ['9x5 cm', '9x5.5 cm'],
-          Cantidad: ['1000', '2000', '5000'],
-          Papel: ['Estucado 300gr', 'Estucado 350gr'],
-          Impresión: ['1 Cara', '2 Caras'],
-          Acabado: ['Mate', 'Brillo']
-        }
-      }
-    ]
-  },
-  {
-    id: 'publicitario',
-    name: 'Material Publicitario',
-    products: [
-      {
-        id: 2,
-        name: 'Invitaciones',
-        image: invSrc,
-        options: {
-          Tamaño: ['10,5x6 cm', '7x10 cm'],
-          Cantidad: ['1000', '2000', '5000'],
-          Papel: ['Couché 115gr', 'Couché 150gr', 'Couché 200gr', 'Couché 250gr'],
-          Impresión: ['1 Cara', '2 Caras']
-        }
-      },
-      {
-        id: 3,
-        name: 'Volantes',
-        image: volSrc,
-        options: {
-          Tamaño: ['7x10 cm'],
-          Cantidad: ['1000', '5000', '10000'],
-          Papel: ['Bond 63gr', 'Bond 75gr'],
-          Impresión: ['1 Cara', '2 Caras']
-        }
-      }
-    ]
-  }
-];
+import '../styles/Catalog.scss';
+import { useEffect, useState } from 'react';
+import { getCategories, getProductsByCategory } from '../services/productService';
+import ProductCard from '../components/ProductCard';
 
 export default function ClientHome() {
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const categoriesData = await getCategories();
+        setCategories(categoriesData);
+        
+        if (categoriesData.length > 0) {
+          setSelectedCategory(categoriesData[0]);
+          fetchProducts(categoriesData[0]);
+        }
+      } catch (error) {
+        console.error('Error al obtener las categorías:', error);
+      }
+    }
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchProducts(selectedCategory);
+    }
+  }, [selectedCategory]);
+
+  async function fetchProducts(category) {
+    try {
+      const productsData = await getProductsByCategory(category);
+      setProducts(productsData);
+    } catch (error) {
+      console.error('Error al obtener productos de la categoría:', error);
+    }
+  }
+
   return (
-    <div>
-      <CatalogCarousel categories={categories} />
+    <div className="tabs-container">
+      <div className="tabs">
+        {categories.length === 0 ? (
+          <p>Cargando categorías...</p>
+        ) : (
+          categories.map((category) => (
+            <button
+              key={category}
+              className={`tab ${selectedCategory === category ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))
+        )}
+      </div>
+
+      {selectedCategory && (
+        <div className="products-container">
+          <h3>Productos en {selectedCategory}</h3>
+          {products.length === 0 ? (
+            <p>No hay productos disponibles para esta categoría.</p>
+          ) : (
+            <div className="product-cards">
+              {products.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -21,6 +21,15 @@ public class ProductRepository: BaseRepository<Product>, IProductRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Product>> GetProductsByCategory(string category)
+    {
+        return await _context.Products
+            .Where(p => p.Category.ToLower() == category.ToLower())
+            .Include(p => p.UsedMaterials)
+            .Include(p => p.Activities)
+            .ToListAsync();
+    }
+    
     public override async ValueTask<Product> GetById(Guid id)
     {
         return await _context.Products

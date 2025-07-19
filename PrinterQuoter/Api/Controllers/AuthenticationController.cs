@@ -28,9 +28,14 @@ public class AuthenticationController: ControllerBase
             return Unauthorized();
         }
         var user = await _service.LoginOrRegisterGoogleAsync(payload.Subject, payload.Name, payload.Email);
-        var result = user.Roles
+        var roles = user.Roles
             .Select(r => new { description = r.Description })
             .ToArray();
-        return Ok(new { roles = result });
+
+        return Ok(new {
+            name = user.UserName,
+            email = user.Email,
+            roles = roles
+        });
     }
 }

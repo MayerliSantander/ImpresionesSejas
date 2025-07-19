@@ -6,12 +6,15 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import "./styles/_button.scss";
 import './styles/main.scss';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { BagProvider } from './utils/BagContext.jsx';
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <App />
+      <BagProvider>
+        <App />
+      </BagProvider>
     </GoogleOAuthProvider>
   </StrictMode>,
 )

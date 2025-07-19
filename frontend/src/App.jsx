@@ -12,6 +12,7 @@ import ActivityFormPage from './pages/ActivityFormPage';
 import ProductsPage from './pages/ProductsPage';
 import ProductFormPage from './pages/ProductFormPage';
 import TemplateUploadPage from './pages/TemplateUploadPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 
 function App() {
   return (
@@ -27,7 +28,8 @@ function App() {
           }
         >
           <Route index element={<Home />} />
-          <Route path="quotes" element={<div>Mis Cotizaciones</div>} />
+          <Route path="quotes" element={<div>Historial de Cotizaciones</div>} />
+          <Route path="product/:id" element={<ProductDetailPage />} />
         </Route>
         <Route
           path="/admin-home"

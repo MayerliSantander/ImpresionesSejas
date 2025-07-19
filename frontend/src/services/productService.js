@@ -17,6 +17,16 @@ export async function getProducts() {
   return response.data;
 }
 
+export async function getProductsByCategory(category) {
+  const response = await api.get(`/Product/category/${category}`);
+  return response.data;
+}
+
+export async function getCategories() {
+  const response = await api.get('/Product/categories');
+  return response.data;
+}
+
 export async function getProductById(id) {
   const response = await api.get(`/Product/${id}`);
   return response.data;

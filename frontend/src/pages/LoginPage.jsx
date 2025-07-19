@@ -34,7 +34,8 @@ export default function LoginPage() {
               if (user && user.roles && user.roles.length > 0) {
                 const role = user.roles[0].description;
                 localStorage.setItem('role', role);
-                localStorage.setItem('username', user.username);
+                const username = user.name || user.email || 'Usuario';
+                localStorage.setItem('username', username);
                 navigate(role === 'admin' ? '/home' : '/home', { replace: true });
               } else {
                 console.error('El usuario no tiene roles definidos:', user);

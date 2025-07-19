@@ -14,6 +14,7 @@ public class ProductConfiguration: IEntityTypeConfiguration<Product>
         builder.Property(p => p.MinimumQuantity).IsRequired();
         builder.Property(p => p.Category).IsRequired();
         builder.Property(p => p.SizeInCm).IsRequired(); 
+        builder.Property(p => p.Description).IsRequired(); 
         builder.Property(p => p.ImageUrls)
             .HasConversion(
                 v => string.Join(',', v),
