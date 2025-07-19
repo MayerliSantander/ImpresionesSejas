@@ -25,6 +25,19 @@ public class ProductService: IProductService
         var products = await _productUseCase.ProductRepository.GetAll();
         return products.Select(ProductResponseDto.FromEntity);
     }
+    
+    public async Task<IEnumerable<ProductResponseDto>> GetProductsByCategory(string category)
+    {
+        var products = await _productUseCase.ProductRepository.GetProductsByCategory(category);
+        return products.Select(ProductResponseDto.FromEntity);
+    }
+    
+    public async Task<IEnumerable<string>> GetCategories()
+    {
+        var products = await _productUseCase.ProductRepository.GetAll();
+        var categories = products.Select(p => p.Category).Distinct().ToList();
+        return categories;
+    }
 
     public async Task<ProductDto> CreateProduct(ProductDto productDto)
     {
@@ -74,6 +87,7 @@ public class ProductService: IProductService
         product.MinimumQuantity = productDto.MinimumQuantity;
         product.Category = productDto.Category;
         product.SizeInCm = productDto.SizeInCm;
+        product.Description = productDto.Description;
         product.ImageUrls = productDto.ImageUrls ?? new List<string>();
 
         var existingUsedMaterials = product.UsedMaterials.ToList();
