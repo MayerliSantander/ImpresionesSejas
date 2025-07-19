@@ -1,15 +1,14 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import '../styles/_button.scss';
 
 export default function GenericButton({
   variant = 'primary',
-  size,
-  icon,
+  size = 'sm',
+  icon = null,
   iconPosition = 'left',
   circle = false,
-  className,
+  className = '',
   children,
   ...props
 }) {

@@ -1,0 +1,99 @@
+.bag-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 2500;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.bag-modal-right {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 340px;
+  max-width: 90vw;
+  height: 100vh;
+  background-color: white;
+  padding: 1rem 1rem 2rem;
+  overflow-y: auto;
+  animation: slideInBag 0.3s ease-out;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+  z-index: 3000;
+}
+
+@keyframes slideInBag {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.bag-list {
+  padding: 0;
+  margin: 0 0 1rem 0;
+  list-style: none;
+}
+
+.bag-item {
+  border-bottom: 1px solid #ccc;
+  padding: 0.75rem 0;
+}
+
+.bag-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.bag-item-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bag-item-options {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  padding-left: 0.5rem;
+}
+
+.quote-section {
+  margin-top: 1rem;
+}
+
+.bag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.bag-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.close-button {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+

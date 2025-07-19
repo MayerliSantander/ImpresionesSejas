@@ -1,4 +1,3 @@
-import React from 'react';
 import GenericButton from './GenericButton';
 import { TbTrash } from "react-icons/tb";
 import { Form, Formik } from 'formik';
@@ -6,6 +5,8 @@ import * as Yup from 'yup';
 import FormInput from './FormInput';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { sendQuotation } from '../services/quotationService';
+import { IoClose } from 'react-icons/io5';
+import '../styles/_Bag.scss';
 
 export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
   const handleQuoteSubmit = async (values, {resetForm}) => {
@@ -49,13 +50,14 @@ export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
 			className="bag-modal-right"
 			onClick={(e) => e.stopPropagation()}
     >
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="h3">Bolsa</h5>
+      <div className="bag-header">
+        <h5 className="bag-title">Bolsa</h5>
         <GenericButton
           variant="light"
           circle
-          icon={<span>&times;</span>}
+          icon={<IoClose size={20} />}
           onClick={onClose}
+          className="close-button"
         />
       </div>
       {bag.length === 0 ? (
@@ -66,7 +68,7 @@ export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
             {bag.map((item, idx) => (
               <li key={idx} className="bag-item">
                 <div className="bag-item-header">
-                  <strong>{item.name}</strong>
+                  <div className="bag-item-name">{item.name}</div>
                   <GenericButton
                     variant="light"
                     circle
@@ -76,11 +78,22 @@ export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
                   />
                 </div>
                 <ul className="bag-item-options">
-                  {Object.entries(item.selectedOptions).map(([k, v]) => (
-                    <li key={k}>
-                      {k}: {v}
-                    </li>
-                  ))}
+                  {Object.entries(item.selectedOptions).map(([k, v]) => {
+                    if (!v) return null;
+                    const etiquetas = {
+                      size: 'Tamaño',
+                      quantity: 'Cantidad',
+                      paper: 'Tipo de papel',
+                      printType: 'Impresión',
+                      finish: 'Acabado'
+                    };
+                    if (k === 'finish' && v === '') return null;
+                    return (
+                      <li key={k}>
+                        <strong>{etiquetas[k] || k}:</strong> {v}
+                      </li>
+                    );
+                  })}
                 </ul>
               </li>
             ))}

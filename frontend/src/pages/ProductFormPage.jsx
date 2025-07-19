@@ -1,14 +1,14 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { FiArrowLeft, FiTrash2 } from 'react-icons/fi';
-import GenericButton from '../components/GenericButton';
-import FormInput from '../components/FormInput';
-import * as Yup from 'yup';
 import { FieldArray, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
-import { createProduct, getProductById, updateProduct } from '../services/productService';
-import { getMaterials } from '../services/materialService';
+import { FiArrowLeft, FiTrash2 } from 'react-icons/fi';
+import { useNavigate, useParams } from 'react-router-dom';
+import * as Yup from 'yup';
+import FormInput from '../components/FormInput';
+import GenericButton from '../components/GenericButton';
 import { getActivities } from '../services/activityService';
 import cloudinaryService from '../services/cloudinaryService';
+import { getMaterials } from '../services/materialService';
+import { createProduct, getProductById, updateProduct } from '../services/productService';
 
 export default function ProductFormPage() {
   const { id } = useParams();
@@ -21,6 +21,7 @@ export default function ProductFormPage() {
     minimumQuantity: Yup.number().typeError('Debe ser un número').integer('Debe ser un número entero').min(1, 'Debe ser al menos 1').required('La cantidad mínima es obligatoria'),
     category: Yup.string().required('La categoría es obligatoria'),
     sizeInCm: Yup.string().required('El tamaño en cm es obligatorio'),
+    description: Yup.string().required('La descripción es obligatoria'),
     images: Yup.array().test(
       'at-least-one-image',
       'Debe subir al menos una imagen',
@@ -45,6 +46,7 @@ export default function ProductFormPage() {
     minimumQuantity: '',  
     category: '',
     sizeInCm: '',
+    description: '',
     images: [],
     imageUrls: [],
     usedMaterials: [],
@@ -85,7 +87,10 @@ export default function ProductFormPage() {
           const matchedMaterial = availableMaterials.find(m => m.id === um.materialId);
             return {
               ...um,
-              materialName: matchedMaterial ? matchedMaterial.materialName : 'Desconocido'
+              materialName: matchedMaterial
+                ? `${matchedMaterial.materialName} (${matchedMaterial.type})`
+                : 'Desconocido'
+
             };
         });
 
@@ -94,6 +99,7 @@ export default function ProductFormPage() {
           minimumQuantity: data.minimumQuantity,
           category: data.category,
           sizeInCm: data.sizeInCm,
+          description: data.description,
           usedMaterials: enrichedMaterials,
           activities: data.activityIds || [],
           images: [],
@@ -120,6 +126,7 @@ export default function ProductFormPage() {
         minimumQuantity: values.minimumQuantity,
         category: values.category,
         sizeInCm: values.sizeInCm,
+        description: values.description,
         imageUrls: finalImageUrls,
         activityIds: values.activities,
         usedMaterials: values.usedMaterials.map(m => ({
@@ -177,6 +184,13 @@ export default function ProductFormPage() {
               label="Tamaño (cm)"
               name="sizeInCm"
               placeholder="Ej: 9x5" />
+            <FormInput
+              label="Descripción"
+              name="description"
+              placeholder="Ingrese la descripción del producto"
+              as="textarea"
+              rows="5"
+            />
 
             <div className="mb-3">
               <label className="form-label">Imágenes</label>
@@ -247,7 +261,7 @@ export default function ProductFormPage() {
                     .filter(mat => selectedIds.includes(mat.id))
                     .map(mat => ({
                       materialId: mat.id,
-                      materialName: mat.materialName,
+                      materialName: `${mat.materialName} (${mat.type})`,
                       quantity: ''
                     }));
 
@@ -264,7 +278,7 @@ export default function ProductFormPage() {
                 } }
               >
                 {availableMaterials.map(mat => (
-                  <option key={mat.id} value={mat.id}>{mat.materialName}</option>
+                  <option key={mat.id} value={mat.id}>{mat.materialName} ({mat.type})</option>
                 ))}
               </select>
             </div>
