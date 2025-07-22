@@ -13,12 +13,28 @@ export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
     try {
       const username = localStorage.getItem('username');
 
+      const formatOptionsKeys = (options) => {
+        const keyMap = {
+          size: 'Tamaño',
+          quantity: 'Cantidad',
+          paper: 'Papel',
+          printType: 'Impresión',
+          finish: 'Acabado'
+        };
+
+        return Object.fromEntries(
+          Object.entries(options)
+            .filter(([, v]) => v !== '')
+            .map(([k, v]) => [keyMap[k] || k, String(v)])
+        );
+      };
+
       const dto = {
         phone: values.phone,
         clientName: username,
         bag: bag.map(item => ({
           name: item.name,
-          selectedOptions: item.selectedOptions
+          selectedOptions: formatOptionsKeys(item.selectedOptions)
         }))
       };
       await sendQuotation(dto);

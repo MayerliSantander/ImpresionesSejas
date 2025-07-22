@@ -71,9 +71,20 @@ export default function ProductDetailPage() {
 			}
 		}
 
+    const selectedOptions = {
+      size: values.size,
+      quantity: values.quantity,
+      paper: values.paper,
+      printType: values.printType,
+    };
+
+    if (isCardProduct && values.finish) {
+      selectedOptions.finish = values.finish;
+    }
+    
 		const newItem = {
 			name: product.productName,
-			selectedOptions: values
+			selectedOptions
 		};
 
 		addToBag(newItem);
