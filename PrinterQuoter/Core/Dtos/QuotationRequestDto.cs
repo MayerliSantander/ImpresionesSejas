@@ -3,5 +3,5 @@ namespace Core.Dtos;
 public class QuotationRequestDto
 {
     public string Phone { get; set; }
-    public List<QuotationProductDto> Bag { get; set; }
+    public QuotationDto Bag { get; set; }
 }

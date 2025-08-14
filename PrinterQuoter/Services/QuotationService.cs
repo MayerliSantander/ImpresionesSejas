@@ -1,21 +1,89 @@
-using System.Text;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Core.Dtos;
+using Core.Entities;
 using Core.Interfaces.Services;
+using Core.Interfaces.UseCases;
 
 namespace Services;
 
 public class QuotationService : IQuotationService
 {
+    private readonly IQuotationUseCase _quotationUseCase;
     private readonly string _templatePath;
     private readonly string _outputDir;
-    public QuotationService(string templatePath, string outputDir)
+    public QuotationService(IQuotationUseCase quotationUseCase, string templatePath, string outputDir)
     {
+        _quotationUseCase = quotationUseCase;
         _templatePath = templatePath;
         _outputDir = outputDir;
     }
-    public async Task<string> BuildQuotationDocument(List<QuotationProductDto> products, string clientName)
+    
+    public async ValueTask<ShowQuotationDto> GetQuotationById(Guid quotationId)
+    {
+        var quotation = await _quotationUseCase.QuotationRepository.GetById(quotationId);
+        return ShowQuotationDto.FromEntity(quotation);
+    }
+    
+    public async Task<IEnumerable<ShowQuotationDto>> GetQuotationsByUserIdAsync(Guid userId)
+    {
+        var quotations = await _quotationUseCase.QuotationRepository.GetQuotationsByUserIdAsync(userId);
+        return quotations.Select(ShowQuotationDto.FromEntity);
+    }
+    
+    public async Task<ShowQuotationDto> CreateQuotation(QuotationDto quotationDto)
+    {
+        var user = await _quotationUseCase.UserRepository.GetById(quotationDto.UserId);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Usuario no encontrado.");
+        }
+        
+        Quotation quotation = quotationDto.CreateQuotation();
+        quotation.QuotationNumber = await _quotationUseCase.QuotationRepository.GetNextQuotationNumber();
+        quotation.User = user;
+        await _quotationUseCase.QuotationRepository.Add(quotation);
+
+        foreach (QuotationDetailDto quotationDetailDto in quotationDto.QuotationDetailDtos)
+        {
+            try
+            {
+                QuotationDetail quotationDetail = quotationDetailDto.CreateQuotationDetail();
+                
+                quotationDetail.Product = await _quotationUseCase.ProductRepository.GetById(quotationDetailDto.ProductId);
+                quotationDetail.Material = await _quotationUseCase.MaterialRepository.GetById(quotationDetailDto.MaterialId);
+                quotationDetail.QuotationId = quotation.Id;
+                
+                quotation.QuotationDetails.Add(quotationDetail);
+                await _quotationUseCase.QuotationDetailRepository.Add(quotationDetail);
+                
+                foreach (Guid activityId in quotationDetailDto.ActivityIds)
+                {
+                    Activity activity = await _quotationUseCase.ActivityRepository.GetById(activityId);
+                    if (activity != null)
+                    {
+                        quotationDetail.Activities.Add(activity);
+                    }
+                }
+                
+                quotationDetail.Price = SimulatePrice(quotationDetail);
+                quotation.TotalPrice += quotationDetail.Price;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        string path = await BuildQuotationDocument(quotation);
+        quotation.DocumentPath = path;
+
+        await _quotationUseCase.Commitment();
+        return ShowQuotationDto.FromEntity(quotation);
+    }
+    
+    public async Task<string> BuildQuotationDocument(Quotation quotation)
     {
         if (!File.Exists(_templatePath))
             throw new FileNotFoundException("Plantilla no encontrada en: " + _templatePath);
@@ -23,7 +91,8 @@ public class QuotationService : IQuotationService
         if (!Directory.Exists(_outputDir))
             Directory.CreateDirectory(_outputDir);
 
-        string clientFileName = clientName.ToLower().Replace(" ", "_");
+        string userName = quotation.User.UserName;
+        string clientFileName = userName.ToLower().Replace(" ", "_");
 
         string fileName = $"cotizacion_{clientFileName}_{DateTime.Now:yyyyMMddHHmmss}.docx";
         string outputPath = Path.Combine(_outputDir, fileName);
@@ -34,12 +103,11 @@ public class QuotationService : IQuotationService
         var body = wordDoc.MainDocumentPart.Document.Body;
 
         ReplacePlaceholder(body, "{{fecha}}", DateTime.Now.ToString("dd/MM/yyyy"));
-        ReplacePlaceholder(body, "{{cliente}}", clientName);
+        ReplacePlaceholder(body, "{{cliente}}", userName);
+        ReplacePlaceholder(body, "{{numero}}", quotation.QuotationNumber.ToString());
         ReplacePlaceholder(body, "{{entrega}}", "3 días hábiles");
         ReplacePlaceholder(body, "{{validez}}", "7 días");
-
-        decimal total = 0;
-
+        
         var productosParagraph = body.Descendants<Paragraph>()
             .FirstOrDefault(p => p.InnerText.Contains("{{productos}}"));
 
@@ -62,14 +130,11 @@ public class QuotationService : IQuotationService
             );
             table.AppendChild(tblProps);
 
-            foreach (var product in products)
+            foreach (var quotationDetail in quotation.QuotationDetails)
             {
-                decimal price = SimulatePrice(product.SelectedOptions);
-                total += price;
-
-                string cantidad = product.SelectedOptions.TryGetValue("Cantidad", out var val) ? val : "";
-                string descripcion = FormatProductLine(product.Name, product.SelectedOptions);
-                string subtotal = $"Bs. {price:F2}";
+                int cantidad = quotationDetail.Quantity;
+                string descripcion = FormatProductLine(quotationDetail.Product.ProductName, quotationDetail);
+                string subtotal = $"Bs. {quotationDetail.Price:F2}";
 
                 TableRow row = new TableRow();
 
@@ -86,12 +151,11 @@ public class QuotationService : IQuotationService
             productosParagraph.Remove();
         }
 
-        ReplacePlaceholder(body, "{{subtotal}}", total.ToString("F2"));
-        ReplacePlaceholder(body, "{{total}}", total.ToString("F2"));
+        ReplacePlaceholder(body, "{{total}}", quotation.TotalPrice.ToString("F2"));
         wordDoc.MainDocumentPart.Document.Save();
         
         return outputPath;
-    }
+    }   
 
     private void ReplacePlaceholder(Body body, string placeholder, string newValue)
     {
@@ -113,34 +177,84 @@ public class QuotationService : IQuotationService
         }
     }
 
-    public decimal SimulatePrice(Dictionary<string, string> options)
+    public decimal SimulatePrice(QuotationDetail quotationDetail)
     {
-        if (options.TryGetValue("Cantidad", out string cantidadStr) &&
-            int.TryParse(cantidadStr, out int cantidad))
-        {
-            return cantidad * 0.05m;
-        }
-        return 0;
+        return quotationDetail.Quantity * 4;
     }
     
-    private string FormatProductLine(string name, Dictionary<string, string> options)
+    private string FormatProductLine(string name, QuotationDetail quotationDetail)
     {
         var parts = new List<string> { name };
 
-        if (options.TryGetValue("Tamaño", out var tam))
-            parts.Add("Tamaño " + tam);
-
-        if (options.TryGetValue("Papel", out var papel))
-            parts.Add("en papel " + papel);
-
-        if (options.TryGetValue("Impresión", out var imp))
-            parts.Add("Impresión " + imp);
-
+        parts.Add("Tamaño " + quotationDetail.Product.SizeInCm);
+        parts.Add("en " + quotationDetail.Material.MaterialName);
+        parts.Add(quotationDetail.Material.Type);
+        foreach (var activities in quotationDetail.Activities)
+        {
+            parts.Add(activities.ActivityName);
+        }
+        
         return string.Join(" ", parts);
     }
-
-    private string FormatOptions(Dictionary<string, string> options)
+    
+    public async Task<bool> RequestConfirmationAsync(Guid quotationId)
     {
-        return string.Join(", ", options.Select(kv => $"{kv.Key}: {kv.Value}"));
+        var quotation = await _quotationUseCase.QuotationRepository.GetById(quotationId);
+
+        if (quotation == null)
+        {
+            throw new InvalidOperationException("Cotización no encontrada.");
+        }
+        
+        var updatedQuotation = await UpdateQuotationStatus(quotationId);
+        if (updatedQuotation.Status == "Vencida")
+        {
+            throw new InvalidOperationException("La cotización ha expirado.");
+        }
+        
+        if (updatedQuotation.Status == "Confirmada" || updatedQuotation.Status == "Esperando confirmación")
+        {
+            throw new InvalidOperationException("No se puede solicitar la confirmación una cotización que ya está confirmada o ya solicitada.");
+        }
+
+        var productDetails = updatedQuotation.QuotationDetails.ToList();
+        
+        if (productDetails == null || !productDetails.Any())
+        {
+            throw new InvalidOperationException("La cotización no tiene productos.");
+        }
+        
+        var isStockAvailable = await _quotationUseCase.InventoryRepository.ValidateStockAsync(productDetails);
+        if (!isStockAvailable)
+        {
+            throw new InvalidOperationException("No hay suficiente stock para los productos de la cotización.");
+        }
+
+        updatedQuotation.Status = "Esperando confirmación";
+        updatedQuotation.RequestedConfirmationDate = DateTime.Now;
+        await _quotationUseCase.QuotationRepository.Update(updatedQuotation);
+        await _quotationUseCase.Commitment();
+        return true;
+    }
+    
+    public async Task<Quotation> UpdateQuotationStatus(Guid quotationId)
+    {
+        var quotation = await _quotationUseCase.QuotationRepository.GetById(quotationId);
+    
+        if (quotation == null)
+        {
+            throw new InvalidOperationException("Cotización no encontrada.");
+        }
+
+        var expirationDate = quotation.Date.AddDays(quotation.ValidityDays);
+        if (expirationDate < DateTime.Now && quotation.Status != "Vencida")
+        {
+            quotation.Status = "Vencida";
+        
+            await _quotationUseCase.QuotationRepository.Update(quotation); 
+        
+            await _quotationUseCase.Commitment();
+        }
+        return quotation;
     }
 }

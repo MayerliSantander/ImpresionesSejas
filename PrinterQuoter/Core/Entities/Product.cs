@@ -11,4 +11,5 @@ public class Product
     public string Description { get; set; }
     public ICollection<UsedMaterial> UsedMaterials { get; set; }
     public ICollection<Activity> Activities { get; set; }
+    public ICollection<QuotationDetail> QuotationDetails { get; set; }
 }

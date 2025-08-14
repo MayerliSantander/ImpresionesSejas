@@ -25,6 +25,7 @@ public class ProductDto
         product.Description = Description;
         product.UsedMaterials = new List<UsedMaterial>();
         product.Activities = new List<Activity>();
+        product.QuotationDetails = new List<QuotationDetail>();
         return product;
     }
     

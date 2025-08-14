@@ -4,6 +4,7 @@ using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    partial class SqlContextModelSnapshot : ModelSnapshot
+    [Migration("20250801204652_quotationAndInventoryMigration")]
+    partial class quotationAndInventoryMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,21 +38,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("ProductsId");
 
                     b.ToTable("ActivityProduct");
-                });
-
-            modelBuilder.Entity("ActivityQuotationDetail", b =>
-                {
-                    b.Property<Guid>("ActivitiesId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("QuotationDetailsId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("ActivitiesId", "QuotationDetailsId");
-
-                    b.HasIndex("QuotationDetailsId");
-
-                    b.ToTable("ActivityQuotationDetail");
                 });
 
             modelBuilder.Entity("Core.Entities.Activity", b =>
@@ -132,17 +120,9 @@ namespace DataAccess.Migrations
                     b.Property<DateTime>("DeliveryDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("QuotationId")
-                        .HasColumnType("char(36)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("Id");
-
-                    b.HasIndex("QuotationId")
-                        .IsUnique();
-
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Order");
                 });
 
             modelBuilder.Entity("Core.Entities.Product", b =>
@@ -188,10 +168,10 @@ namespace DataAccess.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("DocumentPath")
-                        .HasColumnType("longtext");
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("OrderId")
+                    b.Property<Guid?>("OrderId1")
                         .HasColumnType("char(36)");
 
                     b.Property<int>("QuotationNumber")
@@ -210,46 +190,25 @@ namespace DataAccess.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("char(36)");
+
                     b.Property<int>("ValidityDays")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("OrderId1")
+                        .IsUnique();
+
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId1");
+
                     b.ToTable("Quotations", (string)null);
-                });
-
-            modelBuilder.Entity("Core.Entities.QuotationDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("MaterialId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("QuotationId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MaterialId");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("QuotationId");
-
-                    b.ToTable("QuotationDetails", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Role", b =>
@@ -322,6 +281,21 @@ namespace DataAccess.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("ProductQuotation", b =>
+                {
+                    b.Property<Guid>("ProductsId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("QuotationsId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ProductsId", "QuotationsId");
+
+                    b.HasIndex("QuotationsId");
+
+                    b.ToTable("QuotationProducts", (string)null);
+                });
+
             modelBuilder.Entity("RoleUser", b =>
                 {
                     b.Property<Guid>("RolesId")
@@ -352,21 +326,6 @@ namespace DataAccess.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ActivityQuotationDetail", b =>
-                {
-                    b.HasOne("Core.Entities.Activity", null)
-                        .WithMany()
-                        .HasForeignKey("ActivitiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.QuotationDetail", null)
-                        .WithMany()
-                        .HasForeignKey("QuotationDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Core.Entities.Inventory", b =>
                 {
                     b.HasOne("Core.Entities.Material", "Material")
@@ -378,53 +337,29 @@ namespace DataAccess.Migrations
                     b.Navigation("Material");
                 });
 
-            modelBuilder.Entity("Core.Entities.Order", b =>
-                {
-                    b.HasOne("Core.Entities.Quotation", "Quotation")
-                        .WithOne("Order")
-                        .HasForeignKey("Core.Entities.Order", "QuotationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Quotation");
-                });
-
             modelBuilder.Entity("Core.Entities.Quotation", b =>
                 {
+                    b.HasOne("Core.Entities.Order", "Order")
+                        .WithOne()
+                        .HasForeignKey("Core.Entities.Quotation", "OrderId");
+
+                    b.HasOne("Core.Entities.Order", null)
+                        .WithOne("Quotation")
+                        .HasForeignKey("Core.Entities.Quotation", "OrderId1");
+
                     b.HasOne("Core.Entities.User", "User")
-                        .WithMany("Quotations")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Core.Entities.User", null)
+                        .WithMany("Quotations")
+                        .HasForeignKey("UserId1");
+
+                    b.Navigation("Order");
+
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Core.Entities.QuotationDetail", b =>
-                {
-                    b.HasOne("Core.Entities.Material", "Material")
-                        .WithMany("QuotationDetails")
-                        .HasForeignKey("MaterialId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.Product", "Product")
-                        .WithMany("QuotationDetails")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.Quotation", "Quotation")
-                        .WithMany("QuotationDetails")
-                        .HasForeignKey("QuotationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Material");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Quotation");
                 });
 
             modelBuilder.Entity("Core.Entities.UsedMaterial", b =>
@@ -446,6 +381,21 @@ namespace DataAccess.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("ProductQuotation", b =>
+                {
+                    b.HasOne("Core.Entities.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Quotation", null)
+                        .WithMany()
+                        .HasForeignKey("QuotationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("RoleUser", b =>
                 {
                     b.HasOne("Core.Entities.Role", null)
@@ -463,23 +413,18 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Core.Entities.Material", b =>
                 {
-                    b.Navigation("QuotationDetails");
-
                     b.Navigation("UsedMaterials");
+                });
+
+            modelBuilder.Entity("Core.Entities.Order", b =>
+                {
+                    b.Navigation("Quotation")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Core.Entities.Product", b =>
                 {
-                    b.Navigation("QuotationDetails");
-
                     b.Navigation("UsedMaterials");
-                });
-
-            modelBuilder.Entity("Core.Entities.Quotation", b =>
-                {
-                    b.Navigation("Order");
-
-                    b.Navigation("QuotationDetails");
                 });
 
             modelBuilder.Entity("Core.Entities.User", b =>

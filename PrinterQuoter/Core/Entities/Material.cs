@@ -8,4 +8,5 @@ public class Material
     public string Type { get; set; }
     public double MaterialPrice { get; set; }
     public ICollection<UsedMaterial> UsedMaterials { get; set; }
+    public ICollection<QuotationDetail> QuotationDetails { get; set; }
 }

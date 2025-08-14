@@ -27,5 +27,9 @@ public class ProductConfiguration: IEntityTypeConfiguration<Product>
 
         builder.HasMany(p => p.Activities)
             .WithMany(p => p.Products);
+        
+        builder.HasMany(p => p.QuotationDetails)
+            .WithOne(q => q.Product)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
