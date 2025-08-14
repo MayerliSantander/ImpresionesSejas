@@ -18,6 +18,7 @@ public class MaterialDto
         material.Type = Type;
         material.MaterialPrice = MaterialPrice;
         material.UsedMaterials = new List<UsedMaterial>();
+        material.QuotationDetails = new List<QuotationDetail>();
         return material;
     }
 }

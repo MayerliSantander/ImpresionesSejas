@@ -6,7 +6,7 @@ export default function FormInput({ label, as = 'input', ...props }) {
   const hasError = meta.touched && meta.error;
 
   return (
-    <div className="mb-3">
+    <div className="mb-2">
       <label htmlFor={props.id || props.name} className="form-label">{label}</label>
       {as === 'textarea' ? (
         <textarea

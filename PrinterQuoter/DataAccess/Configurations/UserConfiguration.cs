@@ -16,7 +16,11 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
         builder.Property(p => p.Email);
         builder.Property(p => p.UserName);
         builder.Property(p => p.Phone);
-        //builder.Property(p => p.Quotations);
+        
+        builder.HasMany(u => u.Quotations)
+            .WithOne(q => q.User)
+            .HasForeignKey(q => q.UserId);
+        
         builder.HasMany(p => p.Roles)
             .WithMany(e => e.Users);
     }

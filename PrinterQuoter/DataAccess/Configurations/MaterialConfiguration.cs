@@ -20,6 +20,9 @@ namespace DataAccess.Configurations
 			
 			builder.HasMany(p => p.UsedMaterials)
 				.WithOne(p => p.Material);
+
+			builder.HasMany(q => q.QuotationDetails)
+				.WithOne(q => q.Material);
 		}
 	}
 }

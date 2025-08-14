@@ -14,6 +14,7 @@ public class ActivityDto
         activity.ActivityName = ActivityName;
         activity.Price = Price;
         activity.Products = new List<Product>();
+        activity.QuotationDetails = new List<QuotationDetail>();
         return activity;
     }
 }

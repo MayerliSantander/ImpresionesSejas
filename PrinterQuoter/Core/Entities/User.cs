@@ -8,5 +8,5 @@ public class User
     public string UserName { get; set; }
     public string Phone { get; set; }
     public ICollection<Role> Roles { get; set; }
-    //public ICollection<Quotation> Quotations { get; set; }
+    public ICollection<Quotation> Quotations { get; set; }
 }

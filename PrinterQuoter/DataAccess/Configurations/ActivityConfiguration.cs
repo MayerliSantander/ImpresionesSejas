@@ -17,5 +17,8 @@ public class ActivityConfiguration: IEntityTypeConfiguration<Activity>
         
         builder.HasMany(p => p.Products)
             .WithMany(p => p.Activities);
+
+        builder.HasMany(q => q.QuotationDetails)
+            .WithMany(q => q.Activities);
     }
 }

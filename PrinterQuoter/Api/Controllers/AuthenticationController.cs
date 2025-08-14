@@ -33,6 +33,7 @@ public class AuthenticationController: ControllerBase
             .ToArray();
 
         return Ok(new {
+            id = user.Id,
             name = user.UserName,
             email = user.Email,
             roles = roles

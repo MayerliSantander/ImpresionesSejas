@@ -37,6 +37,21 @@ namespace DataAccess.Migrations
                     b.ToTable("ActivityProduct");
                 });
 
+            modelBuilder.Entity("ActivityQuotationDetail", b =>
+                {
+                    b.Property<Guid>("ActivitiesId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("QuotationDetailsId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ActivitiesId", "QuotationDetailsId");
+
+                    b.HasIndex("QuotationDetailsId");
+
+                    b.ToTable("ActivityQuotationDetail");
+                });
+
             modelBuilder.Entity("Core.Entities.Activity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -56,6 +71,25 @@ namespace DataAccess.Migrations
                     b.HasIndex("Id");
 
                     b.ToTable("Activities", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.Inventory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
+
+                    b.ToTable("Inventories", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Material", b =>
@@ -84,6 +118,31 @@ namespace DataAccess.Migrations
                     b.HasIndex("Id");
 
                     b.ToTable("Materials", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.Order", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("ConfirmationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("DeliveryDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("QuotationId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id");
+
+                    b.HasIndex("QuotationId")
+                        .IsUnique();
+
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Product", b =>
@@ -118,6 +177,79 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.Quotation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DocumentPath")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("QuotationNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RequestedConfirmationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("ValidityDays")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Quotations", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.QuotationDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("QuotationId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("QuotationId");
+
+                    b.ToTable("QuotationDetails", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Role", b =>
@@ -220,6 +352,81 @@ namespace DataAccess.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ActivityQuotationDetail", b =>
+                {
+                    b.HasOne("Core.Entities.Activity", null)
+                        .WithMany()
+                        .HasForeignKey("ActivitiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.QuotationDetail", null)
+                        .WithMany()
+                        .HasForeignKey("QuotationDetailsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Core.Entities.Inventory", b =>
+                {
+                    b.HasOne("Core.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Material");
+                });
+
+            modelBuilder.Entity("Core.Entities.Order", b =>
+                {
+                    b.HasOne("Core.Entities.Quotation", "Quotation")
+                        .WithOne("Order")
+                        .HasForeignKey("Core.Entities.Order", "QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quotation");
+                });
+
+            modelBuilder.Entity("Core.Entities.Quotation", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("Quotations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.QuotationDetail", b =>
+                {
+                    b.HasOne("Core.Entities.Material", "Material")
+                        .WithMany("QuotationDetails")
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Product", "Product")
+                        .WithMany("QuotationDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Quotation", "Quotation")
+                        .WithMany("QuotationDetails")
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Material");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Quotation");
+                });
+
             modelBuilder.Entity("Core.Entities.UsedMaterial", b =>
                 {
                     b.HasOne("Core.Entities.Material", "Material")
@@ -256,12 +463,28 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Core.Entities.Material", b =>
                 {
+                    b.Navigation("QuotationDetails");
+
                     b.Navigation("UsedMaterials");
                 });
 
             modelBuilder.Entity("Core.Entities.Product", b =>
                 {
+                    b.Navigation("QuotationDetails");
+
                     b.Navigation("UsedMaterials");
+                });
+
+            modelBuilder.Entity("Core.Entities.Quotation", b =>
+                {
+                    b.Navigation("Order");
+
+                    b.Navigation("QuotationDetails");
+                });
+
+            modelBuilder.Entity("Core.Entities.User", b =>
+                {
+                    b.Navigation("Quotations");
                 });
 #pragma warning restore 612, 618
         }

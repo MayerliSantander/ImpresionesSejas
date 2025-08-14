@@ -7,7 +7,7 @@ public class TemplateValidationService : ITemplateValidationService
 {
     private static readonly string[] RequiredFields = new[]
     {
-        "{{fecha}}", "{{cliente}}", "{{productos}}", "{{subtotal}}", "{{total}}", "{{entrega}}", "{{validez}}"
+        "{{fecha}}", "{{cliente}}", "{{numero}}", "{{productos}}", "{{total}}", "{{entrega}}", "{{validez}}"
     };
 
     public async Task<string> ValidateTemplateFileAsync(byte[] fileBytes, string fileName)

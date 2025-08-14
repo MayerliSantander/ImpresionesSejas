@@ -59,13 +59,24 @@ builder.Services.AddScoped<IUsedMaterialRepository, UsedMaterialRepository>();
 
 builder.Services.AddScoped<WhatsAppService>();
 
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IInventoryUseCase, InventoryUseCase>();
+
+builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
+builder.Services.AddScoped<IQuotationUseCase, QuotationUseCase>();
+
 builder.Services.AddScoped<IQuotationService>(provider => {
     var env = provider.GetRequiredService<IWebHostEnvironment>();
     var templatePath = Path.Combine(env.ContentRootPath, "Templates", "plantilla_cotizacion.docx");
     var outputDir = Path.Combine(env.ContentRootPath, "Generated");
 
-    return new QuotationService(templatePath, outputDir);
+    var quotationUseCase = provider.GetRequiredService<IQuotationUseCase>();
+    
+    return new QuotationService(quotationUseCase, templatePath, outputDir);
 });
+
+builder.Services.AddScoped<IQuotationDetailRepository, QuotationDetailRepository>();
 
 builder.Services.AddScoped<ITemplateValidationService, TemplateValidationService>();
 
