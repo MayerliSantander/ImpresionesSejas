@@ -1,0 +1,32 @@
+.detail-header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.back-button {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  color: white !important;
+  width: 36px;
+  height: 36px;
+  border: 2px solid white;
+  border-radius: 50%;
+  transition: background-color 0.3s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+	margin-bottom: 0.5rem;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    transform: scale(1.05);
+  }
+}
+
+.detail-line{
+  margin-top: .15rem;
+  font-size: .875rem;
+  color: #6c757d;
+  overflow-wrap: anywhere;
+}

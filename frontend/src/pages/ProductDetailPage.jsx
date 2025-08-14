@@ -31,9 +31,10 @@ export default function ProductDetailPage() {
       	const allActivities = await getActivities();
 
 				const paperOpts = productData.usedMaterials.map(used => {
-					const material = allMaterials.find(m => m.id === used.materialId);
-					return material ? `${material.materialName} (${material.type})` : 'Desconocido';
-				});
+          const material = allMaterials.find(m => m.id === used.materialId);
+          return material ? { id: material.id, label: `${material.materialName} (${material.type})` } : null;
+        }).filter(opt => opt !== null);
+
 
 				const productActivities = productData.activityIds.map(id =>
 					allActivities.find(act => act.id === id)
@@ -41,11 +42,11 @@ export default function ProductDetailPage() {
 				
 				const printOpts = productActivities
 					.filter(act => act && act.activityName.toLowerCase().startsWith('impresión'))
-					.map(act => act.activityName);
+          .map(act => ({ id: act.id, label: act.activityName }));
 
 				const finishOpts = productActivities
 					.filter(act => act && act.activityName.toLowerCase().startsWith('acabado'))
-					.map(act => act.activityName);
+          .map(act => ({ id: act.id, label: act.activityName }));
 
 				setProduct(productData);
 				setPaperOptions(paperOpts);
@@ -72,17 +73,30 @@ export default function ProductDetailPage() {
 		}
 
     const selectedOptions = {
-      size: values.size,
+      size: {
+        id: values.size,
+        label: product.sizeInCm
+      },
       quantity: values.quantity,
-      paper: values.paper,
-      printType: values.printType,
+      paper: {
+        id: values.paper,
+        label: paperOptions.find(opt => opt.id === values.paper)?.label || values.paper
+      },
+      printType: {
+        id: values.printType,
+        label: printOptions.find(opt => opt.id === values.printType)?.label || values.printType
+      },
     };
 
     if (isCardProduct && values.finish) {
-      selectedOptions.finish = values.finish;
+      selectedOptions.finish = {
+        id: values.finish,
+        label: finishOptions.find(opt => opt.id === values.finish)?.label || values.finish
+      };
     }
     
 		const newItem = {
+      productId: id,
 			name: product.productName,
 			selectedOptions
 		};
@@ -156,7 +170,7 @@ export default function ProductDetailPage() {
               <GenericDropdown
                 label="Tamaño"
                 name="size"
-                options={[product.sizeInCm]}
+                options={[{ id: product.sizeInCm, label: product.sizeInCm }]}
               />
 
               <FormInput

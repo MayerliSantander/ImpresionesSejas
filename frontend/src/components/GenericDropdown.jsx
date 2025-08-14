@@ -10,14 +10,16 @@ export default function GenericDropdown({ label, options, ...props }) {
   const { setValue } = helpers;
   const hasError = meta.touched && meta.error;
 
+  const selectedOption = options.find(opt => opt.id === field.value);
+
   const handleSelect = (option) => {
-    setValue(option);
+    setValue(option.id);
     setIsOpen(false);
   };
 
   return (
-    <div className="custom-dropdown w-100">
-      <label className="dropdown-label body-16 mb-1">{label}</label>
+    <div className="custom-dropdown w-100 mb-2">
+      <label className="dropdown-label body-16 mb-2">{label}</label>
 
       <Dropdown show={isOpen} onToggle={(isOpen) => setIsOpen(isOpen)}>
         <Dropdown.Toggle
@@ -25,20 +27,20 @@ export default function GenericDropdown({ label, options, ...props }) {
           className={`custom-dropdown-toggle d-flex justify-content-between align-items-center ${isOpen ? 'open' : ''} ${hasError ? 'is-invalid' : ''}`}
         >
           <span className="paragraph-14">
-            {field.value || `Seleccione ${label.toLowerCase()}`}
+            {selectedOption ? selectedOption.label : `Seleccione ${label.toLowerCase()}`}
           </span>
           <FaChevronDown />
         </Dropdown.Toggle>
 
         <Dropdown.Menu className="w-100">
-          {options.map((option, index) => (
+          {options.map((option) => (
             <Dropdown.Item
-              key={index}
+              key={option.id}
               onClick={() => handleSelect(option)}
-              active={field.value === option}
+              active={field.value === option.id}
               className="paragraph-14"
             >
-              {option}
+              {option.label}
             </Dropdown.Item>
           ))}
         </Dropdown.Menu>

@@ -92,7 +92,7 @@ export default function TemplateUploadPage() {
         </div>
         <div className="alert alert-info" role="alert">
           Asegúrate de que tu plantilla contenga los siguientes campos en el formato exacto: 
-          <strong>&#123;&#123;fecha&#125;&#125;, &#123;&#123;cliente&#125;&#125;, &#123;&#123;productos&#125;&#125;, &#123;&#123;subtotal&#125;&#125;, &#123;&#123;total&#125;&#125;, &#123;&#123;entrega&#125;&#125;, &#123;&#123;validez&#125;&#125;</strong>
+          <strong>&#123;&#123;fecha&#125;&#125;, &#123;&#123;cliente&#125;&#125;, &#123;&#123;numero&#125;&#125;, &#123;&#123;productos&#125;&#125;, &#123;&#123;total&#125;&#125;, &#123;&#123;entrega&#125;&#125;, &#123;&#123;validez&#125;&#125;</strong>
         </div>
         <GenericButton
           variant="blue-primary"

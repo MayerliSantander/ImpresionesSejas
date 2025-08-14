@@ -13,6 +13,8 @@ import ProductsPage from './pages/ProductsPage';
 import ProductFormPage from './pages/ProductFormPage';
 import TemplateUploadPage from './pages/TemplateUploadPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import QuotationListPage from './pages/QuotationListPage';
+import QuotationDetailPage from './pages/QuotationDetailPage';
 
 function App() {
   return (
@@ -28,7 +30,8 @@ function App() {
           }
         >
           <Route index element={<Home />} />
-          <Route path="quotes" element={<div>Historial de Cotizaciones</div>} />
+          <Route path="quotes" element={<QuotationListPage />} />
+          <Route path="quotes/:id" element={<QuotationDetailPage />} />
           <Route path="product/:id" element={<ProductDetailPage />} />
         </Route>
         <Route

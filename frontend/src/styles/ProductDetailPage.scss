@@ -72,22 +72,6 @@
   font-weight: 600;
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-top: 20px;
-  transition: background-color 0.3s ease-in-out;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
 .custom-form-input {
   font-family: 'Inter', sans-serif;
   font-size: 14px;
@@ -108,11 +92,19 @@ button:hover {
   align-items: center;
   gap: 5px;
   justify-content: center;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+  &:hover {
+      background-color: #0056b3; 
+  }
 }
 
 .back-icon-button {
   position: absolute;
-  top: 0px;
+  top: 20px;
   left: 20px;
   z-index: 20;
   background-color: rgba(0, 0, 0, 0.6) !important;

@@ -11,32 +11,21 @@ import '../styles/_Bag.scss';
 export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
   const handleQuoteSubmit = async (values, {resetForm}) => {
     try {
-      const username = localStorage.getItem('username');
-
-      const formatOptionsKeys = (options) => {
-        const keyMap = {
-          size: 'Tamaño',
-          quantity: 'Cantidad',
-          paper: 'Papel',
-          printType: 'Impresión',
-          finish: 'Acabado'
-        };
-
-        return Object.fromEntries(
-          Object.entries(options)
-            .filter(([, v]) => v !== '')
-            .map(([k, v]) => [keyMap[k] || k, String(v)])
-        );
-      };
-
       const dto = {
         phone: values.phone,
-        clientName: username,
-        bag: bag.map(item => ({
-          name: item.name,
-          selectedOptions: formatOptionsKeys(item.selectedOptions)
-        }))
+        bag: {
+          quotationDetailDtos: bag.map(item => ({
+            productId: item.productId,
+            quantity: item.selectedOptions.quantity,
+            materialId: item.selectedOptions.paper.id,
+            activityIds: [
+              item.selectedOptions.printType.id,
+              ...(item.selectedOptions.finish ? [item.selectedOptions.finish.id] : [])
+            ]
+          }))
+        }
       };
+      console.log('Bag a enviar:', dto.bag);
       await sendQuotation(dto);
       console.log('Cotización enviada con:', { phone: values.phone, bag });
       alert('Cotización enviada. Nos pondremos en contacto contigo.');
@@ -104,9 +93,10 @@ export default function ProductBag({ bag, onRemove, onClose, onClearBag }) {
                       finish: 'Acabado'
                     };
                     if (k === 'finish' && v === '') return null;
+                    const valorVisible = typeof v === 'object' && v.label ? v.label : v;
                     return (
                       <li key={k}>
-                        <strong>{etiquetas[k] || k}:</strong> {v}
+                        <strong>{etiquetas[k] || k}:</strong> {valorVisible}
                       </li>
                     );
                   })}
