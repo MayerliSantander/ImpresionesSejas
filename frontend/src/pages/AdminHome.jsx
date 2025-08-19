@@ -12,7 +12,7 @@ const items = [
   { label: 'Actividades', icon: <FaClipboardCheck /> },
   { label: 'Material',    icon: <FaLayerGroup /> },
   { label: 'Productos',   icon: <FaBox /> },
-  { label: 'Ordenes',     icon: <FaClipboardList /> },
+  { label: 'Cotizaciones y Ordenes',     icon: <FaClipboardList /> },
   { label: 'Plantilla Cotización', icon: <FaFileWord /> },
 ];
 
@@ -35,7 +35,7 @@ export default function AdminHome() {
               if (label === 'Productos') {
                 navigate('/admin-home/products');
               }
-              if (label === 'Ordenes') {
+              if (label === 'Cotizaciones y Ordenes') {
                 navigate('/admin-home/orders');
               }
               if (label === 'Plantilla Cotización') {

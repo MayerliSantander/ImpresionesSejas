@@ -4,6 +4,8 @@ import GenericButton from '../components/GenericButton';
 import Spinner from 'react-bootstrap/Spinner';
 import { getUserQuotations, requestQuotationConfirmation, updateQuotationStatus } from '../services/quotationService';
 import '../styles/QuotationList.scss'
+import '../styles/_badges.scss'
+import QuoteCard from '../components/QuoteCard';
 
 const SUPPORT_PHONE = import.meta.env.VITE_SUPPORT_PHONE;
 
@@ -79,21 +81,6 @@ export default function QuotationListPage() {
     }
   };
 
-  const getBadgeClass = (status) => {
-    switch (status) {
-      case 'Pendiente':
-        return 'badge-status badge-status--warning';
-      case 'Esperando confirmación':
-        return 'badge-status badge-status--info';
-      case 'Confirmada':
-        return 'badge-status badge-status--success';
-      case 'Vencida':
-        return 'badge-status badge-status--danger';
-      default:
-        return 'badge-status';
-    }
-  };
-
   if (loading) return <div className="container py-5 text-center">Cargando cotizaciones...</div>;
 
   return (
@@ -106,73 +93,29 @@ export default function QuotationListPage() {
         <p className="text-muted">No tienes cotizaciones registradas.</p>
       ) : (
         <div className="row g-3">
-          {quotations.map((q) => {
-            const expirationDate = new Date(q.date);
-            expirationDate.setDate(expirationDate.getDate() + q.validityDays);
-
-            const productsBrief = q.quotationDetails
-              .map(d => `${d.productName} (${d.quantity} Uds.)`)
-              .join(', ');
-
-						const msg = cardMsg[q.id];
+          {quotations.map(q => {
+            const msg = cardMsg[q.id];
+            const isLoading = loadingId === q.id;
+            const canRequest = q.status !== 'Vencida' && q.status !== 'Confirmada' && q.status !== 'Esperando confirmación' && !isLoading;
 
             return (
               <div key={q.id} className="col-12">
-                <div className="card quotation-card">
-                  <div className="card-body">
-                    <div className="row gy-3 align-items-start">
-                      <div className="col-12 col-md">
-                        <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
-                          <h5 className="mb-0">Cotización #{q.quotationNumber}</h5>
-                          <span className={getBadgeClass(q.status)}>{q.status}</span>
-                        </div>
-                        <div className="meta-row small text-body-secondary mb-2">
-                          <div><span className="label">Fecha:</span> {new Date(q.date).toLocaleDateString()}</div>
-                          <div><span className="label">Vence:</span> {expirationDate.toLocaleDateString()}</div>
-                          <div><span className="label">Validez:</span> {q.validityDays} días</div>
-                        </div>
-
-                        <div className="mt-1">
-                          <div className="fw-semibold">Productos</div>
-                          <div className="text-wrap">{productsBrief}</div>
-                        </div>
-
-                        <div className="mt-2 fw-semibold">
-                          Total: Bs. {q.totalPrice.toFixed(2)}
-                        </div>
-
-												{msg && (
-                          <div className={`card-inline-message ${msg.type} mt-2`} role="alert">
-                            {msg.text}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="col-12 col-md-4 col-lg-3">
-                        <div className="d-grid d-sm-flex d-md-grid">
-                          <GenericButton
-                            variant="blue-primary"
-                            size="sm"
-														className="w-100"
-                            onClick={() => navigate(`/home/quotes/${q.id}`)}
-                          >
-                            Ver detalles
-                          </GenericButton>
-
-                          <GenericButton
-                            variant="blue-primary"
-                            size="sm"
-														className="w-100"
-                            onClick={() => handleRequestConfirmation(q.id)}
-                            disabled={q.status === 'Vencida' || q.status === 'Confirmada' || q.status === 'Esperando confirmación' || loadingId === q.id}
-                          >
-                            {loadingId === q.id ? <Spinner animation="border" size="sm" /> : 'Solicitar confirmación'}
-                          </GenericButton>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <QuoteCard
+                  quote={q}
+                  message={msg}
+                  onView={() => navigate(`/home/quotes/${q.id}`)}
+                  primaryAction={{
+                    label: isLoading ? <Spinner animation="border" size="sm" /> : 'Solicitar confirmación',
+                    onClick: () => handleRequestConfirmation(q.id),
+                    disabled: !canRequest,
+                    loading: isLoading
+                  }}
+                  footer={
+                    <small className="text-body-secondary">
+                      ¿Dudas? Contáctanos al {SUPPORT_PHONE}
+                    </small>
+                  }
+                />
               </div>
             );
           })}

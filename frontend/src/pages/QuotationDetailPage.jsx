@@ -4,6 +4,7 @@ import { getQuotationById } from '../services/quotationService';
 import GenericButton from '../components/GenericButton';
 import { FaArrowLeft } from 'react-icons/fa';
 import '../styles/QuotationDetail.scss'
+import { getBadgeClass } from '../utils/quotes';
 
 export default function QuotationDetailPage() {
   const { id } = useParams();
@@ -22,16 +23,6 @@ export default function QuotationDetailPage() {
     d.setDate(d.getDate() + quotation.validityDays);
     return d;
   }, [quotation]);
-
-	const getBadgeClass = (status) => {
-    switch (status) {
-      case 'Pendiente': return 'badge-status badge-status--warning';
-      case 'Esperando confirmación': return 'badge-status badge-status--info';
-      case 'Confirmado': return 'badge-status badge-status--success';
-      case 'Vencida': return 'badge-status badge-status--danger';
-      default: return 'badge-status';
-    }
-  };
 
 	const formatDetailLine = (item) => {
     const parts = [];

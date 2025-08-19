@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import MaterialsPage from './pages/MaterialsPage';
@@ -15,6 +14,8 @@ import TemplateUploadPage from './pages/TemplateUploadPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import QuotationListPage from './pages/QuotationListPage';
 import QuotationDetailPage from './pages/QuotationDetailPage';
+import AdminQuotesAndOrdersPage from './pages/AdminQuotesAndOrdersPage';
+import OrderDetailPage from './pages/OrderDetailPage';
 
 function App() {
   return (
@@ -53,6 +54,9 @@ function App() {
           <Route path='products/new' element={<ProductFormPage />} />
           <Route path='products/edit/:id' element={<ProductFormPage />} />
           <Route path='template-upload' element={<TemplateUploadPage />} />
+          <Route path='orders' element={<AdminQuotesAndOrdersPage />} />
+          <Route path="orders/:id" element={<OrderDetailPage />} />
+          <Route path="quotes/:id" element={<QuotationDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
