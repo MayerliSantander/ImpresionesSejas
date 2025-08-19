@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import { createMaterial, getMaterialById, updateMaterial } from '../services/materialService';
 import { useEffect, useState } from 'react';
+import { updateInventoryByMaterialId } from '../services/inventoryService';
 
 const validationSchema = Yup.object({
 	materialName: Yup.string()
@@ -18,13 +19,24 @@ const validationSchema = Yup.object({
 		.required('El tamaño es obligatorio'),
 	type: Yup.string()
 		.required('El tipo es obligatorio'),
+	initialQuantity: Yup.number()
+    	.transform((val, orig) => (orig === '' || orig === null ? null : val))
+    	.nullable()
+    	.integer('Debe ser un número entero')
+    	.min(0, 'Debe ser mayor o igual a 0'),
 });
 
 export default function MaterialFormPage() {
 	const { id } = useParams();
   const navigate = useNavigate();
 	const isEdit = Boolean(id);
-  const [initialValues, setInitialValues] = useState({ materialName: '', materialPrice: '', size: '', type: '' });
+  const [initialValues, setInitialValues] = useState({ 
+	materialName: '', 
+	materialPrice: '', 
+	size: '', 
+	type: '',
+	initialQuantity: ''
+});
 
 	useEffect(() => {
     if (isEdit) {
@@ -34,6 +46,9 @@ export default function MaterialFormPage() {
           materialPrice: data.materialPrice,
           size: data.size,
           type: data.type,
+		  		initialQuantity: Number.isFinite(data.inventoryQuantity)
+            ? data.inventoryQuantity
+            : ''
         });
       });
     }
@@ -42,12 +57,32 @@ export default function MaterialFormPage() {
 	const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     setSubmitting(true);
     try {
-			if (isEdit) await updateMaterial(id, values);
-      else await createMaterial(values);
+			const { materialName, materialPrice, size, type, initialQuantity } = values;
+			const materialDto = {
+        materialName,
+        materialPrice: Number(materialPrice),
+        size,
+        type
+      };
+
+			if (isEdit) {
+				await updateMaterial(id, materialDto);
+
+				if (initialQuantity !== '' && initialQuantity !== null && initialQuantity !== undefined) {
+        	await updateInventoryByMaterialId(id, { quantity: Number(initialQuantity) });
+				}
+			} else {
+				const createDto = {...materialDto};
+
+				if (initialQuantity !== '' && initialQuantity !== null && initialQuantity !== undefined) {
+        	createDto.initialQuantity = Number(initialQuantity);
+        }
+        await createMaterial(createDto);
+			}
       navigate('/admin-home/materials');
     } catch (error) {
       console.error(error);
-      setErrors({ submit: error.message || 'Error al guardar el material' });
+      setErrors({ submit: error?.response?.data?.message || error.message || 'Error al guardar el material' });
     } finally {
       setSubmitting(false);
     }
@@ -98,10 +133,18 @@ export default function MaterialFormPage() {
 								name="type"
 								placeholder="Ingrese el tipo"
 							/>
+							<FormInput
+                label="Inventario (opcional)"
+                name="initialQuantity"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Dejar vacío para 0"
+              />
 							{errors.submit && (
                 <div className="alert alert-danger">{errors.submit}</div>
               )}
-							<div className="d-flex gap-2">
+							<div className="d-flex gap-2 mt-3">
 								<GenericButton 
 									variant="blue-primary" 
 									type="submit"
