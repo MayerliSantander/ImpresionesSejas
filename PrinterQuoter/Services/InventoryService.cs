@@ -1,4 +1,5 @@
 using Core.Dtos;
+using Core.Entities;
 using Core.Interfaces.Services;
 using Core.Interfaces.UseCases;
 
@@ -21,6 +22,37 @@ public class InventoryService: IInventoryService
             throw new InvalidOperationException("Material no encontrado en inventario.");
         }
         return InventoryDto.FromEntity(inventory);
+    }
+    
+    public async Task<InventoryDto> CreateInventoryAsync(Guid materialId, int initialQuantity)
+    {
+        if (initialQuantity < 0)
+        {
+            throw new InvalidOperationException("La cantidad inicial no puede ser negativa.");
+        }
+
+        var existing = await _inventoryUseCase.InventoryRepository.GetByMaterialIdAsync(materialId);
+        if (existing != null)
+        {
+            throw new InvalidOperationException("El inventario para este material ya existe.");
+        }
+
+        var inv = new Inventory
+        {
+            MaterialId = materialId,
+            Quantity = initialQuantity
+        };
+
+        await _inventoryUseCase.InventoryRepository.Add(inv);
+        await _inventoryUseCase.Commitment();
+
+        var created = await _inventoryUseCase.InventoryRepository.GetByMaterialIdAsync(materialId);
+        if (created == null)
+        {
+            throw new InvalidOperationException("No se pudo crear el inventario.");
+        }
+        
+        return InventoryDto.FromEntity(created);
     }
     
     public async Task<InventoryDto> UpdateInventoryQuantityAsync(Guid materialId, int quantity)

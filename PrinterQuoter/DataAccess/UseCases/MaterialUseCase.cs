@@ -8,6 +8,7 @@ public class MaterialUseCase : BaseUseCase, IMaterialUseCase
 {
     public MaterialUseCase(SqlContext context) : base(context) { }
     private IMaterialRepository _materialRepository;
+    private IInventoryRepository _inventoryRepository;
 
     public IMaterialRepository GetMaterialRepository()
     {
@@ -16,6 +17,15 @@ public class MaterialUseCase : BaseUseCase, IMaterialUseCase
         }
         return _materialRepository;
     }
+    
+    public IInventoryRepository GetInventoryRepository()
+    {
+        if (_inventoryRepository == null){
+            _inventoryRepository = new InventoryRepository(_context);
+        }
+        return _inventoryRepository;
+    }
 
     IMaterialRepository IMaterialUseCase.MaterialRepository => GetMaterialRepository();
+    IInventoryRepository IMaterialUseCase.InventoryRepository => GetInventoryRepository();
 }

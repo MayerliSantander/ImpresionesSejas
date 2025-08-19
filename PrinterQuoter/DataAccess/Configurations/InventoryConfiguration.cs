@@ -16,6 +16,7 @@ public class InventoryConfiguration: IEntityTypeConfiguration<Inventory>
         builder.HasOne(i => i.Material)
             .WithMany()
             .HasForeignKey(i => i.MaterialId)
+            .OnDelete(DeleteBehavior.Cascade) 
             .IsRequired();
 
         builder.Property(i => i.Quantity)

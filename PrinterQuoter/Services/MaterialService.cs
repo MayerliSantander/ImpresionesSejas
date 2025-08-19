@@ -14,14 +14,44 @@ public class MaterialService : IMaterialService
         _materialUseCase = materialUseCase;
     }
 
-    public async ValueTask<Material> GetMaterialById(Guid id)
+    public async ValueTask<ShowMaterialDto> GetMaterialById(Guid id)
     {
-        return await _materialUseCase.MaterialRepository.GetById(id);
+        var material = await _materialUseCase.MaterialRepository.GetById(id);
+        if (material == null)
+            throw new InvalidOperationException("Material no encontrado.");
+
+        var inventory = await _materialUseCase.InventoryRepository.GetByMaterialIdAsync(id);
+
+        return new ShowMaterialDto()
+        {
+            Id = material.Id,
+            MaterialName = material.MaterialName,
+            Size = material.Size,
+            Type = material.Type,
+            MaterialPrice = material.MaterialPrice,
+            InventoryQuantity = inventory?.Quantity ?? 0
+        };
     }
 
-    public async Task<IEnumerable<Material>> GetAllMaterials()
+    public async Task<IEnumerable<ShowMaterialDto>> GetAllMaterials()
     {
-        return await _materialUseCase.MaterialRepository.GetAll();
+        var materials = await _materialUseCase.MaterialRepository.GetAll();
+        var inventories = await _materialUseCase.InventoryRepository.GetAll();
+
+        var invByMaterial = inventories
+            .ToDictionary(i => i.MaterialId, i => i.Quantity);
+
+        var result = materials.Select(m => new ShowMaterialDto()
+        {
+            Id = m.Id,
+            MaterialName = m.MaterialName,
+            Size = m.Size,
+            Type = m.Type,
+            MaterialPrice = m.MaterialPrice,
+            InventoryQuantity = invByMaterial.TryGetValue(m.Id, out var q) ? q : 0
+        });
+
+        return result;
     }
 
     public async Task<Material> CreateMaterial(MaterialDto materialDto)
@@ -29,6 +59,19 @@ public class MaterialService : IMaterialService
         Material material = materialDto.CreateMaterial();
         await _materialUseCase.MaterialRepository.Add(material);
         await _materialUseCase.Commitment();
+
+        var existingInv = await _materialUseCase.InventoryRepository.GetByMaterialIdAsync(material.Id);
+        if (existingInv == null)
+        {
+            var inv = new Inventory
+            {
+                MaterialId = material.Id,
+                Quantity = materialDto.InitialQuantity ?? 0
+            };
+            await _materialUseCase.InventoryRepository.Add(inv);
+            await _materialUseCase.Commitment();
+        }
+        
         return material;
     }
 

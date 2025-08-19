@@ -1,0 +1,44 @@
+.materials-page .table td,
+.materials-page .table th {
+  vertical-align: middle;
+}
+
+.materials-page .table td:first-child {
+  white-space: normal;
+  word-break: break-word;
+  max-width: 320px;
+}
+
+.materials-page .table-responsive {
+  overflow-x: auto;
+}
+
+.rounded-2xl {
+  border-radius: 12px;
+}
+
+.btn-update-inventory {
+  line-height: 1.2;
+}
+
+@media (max-width: 575.98px) {
+  .btn-update-inventory {
+    max-width: 100px;
+  }
+}
+
+.materials-page .card .btn.btn-sm[aria-label]{
+	padding-bottom: 0.25rem;
+	padding-top: 0.25rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+  font-size: 0;
+}
+
+.materials-page .card .btn.btn-sm[aria-label] svg{
+  width: 18px;
+  height: 18px;
+  display: block;
+  font-size: 18px;
+  pointer-events: none;
+}

@@ -8,6 +8,7 @@ public class MaterialDto
     public string Size { get; set; }
     public string Type { get; set; }
     public double MaterialPrice { get; set; }
+    public int? InitialQuantity { get; set; }
 
     public Material CreateMaterial()
     {

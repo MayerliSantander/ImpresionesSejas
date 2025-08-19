@@ -42,6 +42,35 @@ public class InventoryController : ControllerBase
         }
     }
     
+    [HttpPost("material/{materialId}")]
+    public async Task<IActionResult> CreateInventory(Guid materialId, [FromBody] UpdateInventoryQuantityDto inventoryDto)
+    {
+        User user = await Authentication.CurrentUser(Request.Headers["Authorization"], _userService);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        
+        if (inventoryDto.Quantity < 0)
+        {
+            return BadRequest("La cantidad no puede ser negativa.");
+        }
+        
+        try
+        {
+            var created = await _inventoryService.CreateInventoryAsync(materialId, inventoryDto.Quantity);
+            return Ok(created);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor.", detail = ex.Message });
+        }
+    }
+    
     [HttpPut("material/{materialId}")]
     public async Task<IActionResult> UpdateInventoryByMaterialIdAsync(Guid materialId, UpdateInventoryQuantityDto inventoryDto)
     {
