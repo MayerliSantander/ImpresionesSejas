@@ -14,6 +14,7 @@ public class QuotationUseCase : BaseUseCase, IQuotationUseCase
     private IActivityRepository _activityRepository;
     private IProductRepository _productRepository;
     private IMaterialRepository _materialRepository;
+    private IOrderRepository _orderRepository;
     public IQuotationRepository GetQuotationRepository()
     {
         if (_quotationRepository == null){
@@ -70,6 +71,14 @@ public class QuotationUseCase : BaseUseCase, IQuotationUseCase
         return _materialRepository;
     }
     
+    public IOrderRepository GetOrderRepository()
+    {
+        if (_orderRepository == null){
+            _orderRepository = new OrderRepository(_context);
+        }
+        return _orderRepository;
+    }
+    
     IQuotationRepository IQuotationUseCase.QuotationRepository => GetQuotationRepository();
     IInventoryRepository IQuotationUseCase.InventoryRepository => GetInventoryRepository();
     IQuotationDetailRepository IQuotationUseCase.QuotationDetailRepository => GetQuotationDetailRepository();
@@ -77,4 +86,5 @@ public class QuotationUseCase : BaseUseCase, IQuotationUseCase
     IActivityRepository IQuotationUseCase.ActivityRepository => GetActivityRepository();
     IProductRepository IQuotationUseCase.ProductRepository => GetProductRepository();
     IMaterialRepository IQuotationUseCase.MaterialRepository => GetMaterialRepository();
+    IOrderRepository IQuotationUseCase.OrderRepository => GetOrderRepository();
 }

@@ -1,0 +1,39 @@
+.admin-tabs {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+	margin-top: 10px;
+}
+
+.admin-tab {
+  border: 2px solid transparent;
+  background-color: #ffffff;
+  color: #15336e;
+  padding: .55rem 1rem;
+  font-weight: bold;
+  border-radius: 50px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+}
+
+.admin-tab:hover {
+  background: #e6f4ff;
+	color: #0056b3;
+}
+
+.admin-tab:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(59,130,246,.35),
+    inset 0 0 0 2px #fff;
+}
+
+.admin-tab.active {
+  background-color: #15336e;
+	color: white;
+  border: 2px solid #1e40af;
+}
+
+.admin-tab:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}

@@ -23,6 +23,30 @@ public class QuotationController : ControllerBase
         _quotationService = quotationService;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetQuotations()
+    {
+        User user = await Authentication.CurrentUser(Request.Headers["Authorization"], _userService);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var quotations = await _quotationService.GetAllQuotations();
+        return Ok(quotations);
+    }
+
+    [HttpGet("pending-confirmations")]
+    public async Task<IActionResult> GetPendingConfirmationQuotations()
+    {
+        User user = await Authentication.CurrentUser(Request.Headers["Authorization"], _userService);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        var quotations = await _quotationService.GetPendingConfirmationsAsync();
+        return Ok(quotations);
+    }
+    
     [HttpGet("{quotationId}")]
     public async Task<IActionResult> GetById([Required] Guid quotationId)
     {
@@ -140,6 +164,30 @@ public class QuotationController : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(new { message = ex.Message });
+        }
+    }
+    
+    [HttpPost("confirm/{quotationId}")]
+    public async Task<IActionResult> ConfirmQuotationAsync(Guid quotationId)
+    {
+        try
+        {
+            User user = await Authentication.CurrentUser(Request.Headers["Authorization"], _userService);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _quotationService.ConfirmQuotationAsync(quotationId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor.", detail = ex.Message });
         }
     }
 }

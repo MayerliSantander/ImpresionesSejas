@@ -36,3 +36,18 @@ export async function updateQuotationStatus(quotationId) {
   const response = await api.put(`/Quotation/update-status/${quotationId}`);
   return response.data;
 };
+
+export async function getAllQuotations() {
+  const response = await api.get('/Quotation');
+  return response.data;
+}
+
+export async function getPendingConfirmations() {
+  const response = await api.get('/Quotation/pending-confirmations');
+  return response.data;
+}
+
+export async function confirmQuotation(quotationId) {
+  const response = await api.post(`/Quotation/confirm/${quotationId}`);
+  return response.data;
+};

@@ -80,6 +80,10 @@ builder.Services.AddScoped<IQuotationDetailRepository, QuotationDetailRepository
 
 builder.Services.AddScoped<ITemplateValidationService, TemplateValidationService>();
 
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderUseCase, OrderUseCase>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
