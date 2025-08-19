@@ -12,7 +12,37 @@ public class QuotationRepository : BaseRepository<Quotation>, IQuotationReposito
     {
         _context = context;
     }
+    
+    public override async Task<IEnumerable<Quotation>> GetAll()
+    {
+        return await _context.Quotations
+            .Include(q => q.User)
+            .Include(q => q.QuotationDetails)
+                .ThenInclude(d => d.Product)
+                    .ThenInclude(p => p.UsedMaterials)
+            .Include(q => q.QuotationDetails)
+                .ThenInclude(d => d.Material)
+            .Include(q => q.QuotationDetails)
+                .ThenInclude(d => d.Activities)
+            .ToListAsync();
+    }
 
+    public async Task<IEnumerable<Quotation>> GetPendingQuotations()
+    {
+        return await _context.Quotations
+            .Where(q => q.Status == "Esperando confirmación")
+            .Include(q => q.User)
+            .Include(q => q.QuotationDetails)
+                .ThenInclude(d => d.Product)
+                    .ThenInclude(p => p.UsedMaterials)
+            .Include(q => q.QuotationDetails)
+                .ThenInclude(d => d.Material)
+            .Include(q => q.QuotationDetails)
+                .ThenInclude(d => d.Activities)
+            .OrderByDescending(q => q.RequestedConfirmationDate)
+            .ToListAsync();
+    }
+    
     public override async ValueTask<Quotation> GetById(Guid id)
     {
         return await _context.Quotations

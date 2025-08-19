@@ -19,6 +19,18 @@ public class QuotationService : IQuotationService
         _outputDir = outputDir;
     }
     
+    public async Task<IEnumerable<ShowQuotationDto>> GetAllQuotations()
+    {
+        var quotations = await _quotationUseCase.QuotationRepository.GetAll();
+        return quotations.Select(ShowQuotationDto.FromEntity);
+    }
+    
+    public async Task<IEnumerable<ShowQuotationDto>> GetPendingConfirmationsAsync()
+    {
+        var quotations = await _quotationUseCase.QuotationRepository.GetPendingQuotations();
+        return quotations.Select(ShowQuotationDto.FromEntity);
+    }
+    
     public async ValueTask<ShowQuotationDto> GetQuotationById(Guid quotationId)
     {
         var quotation = await _quotationUseCase.QuotationRepository.GetById(quotationId);
@@ -105,8 +117,8 @@ public class QuotationService : IQuotationService
         ReplacePlaceholder(body, "{{fecha}}", DateTime.Now.ToString("dd/MM/yyyy"));
         ReplacePlaceholder(body, "{{cliente}}", userName);
         ReplacePlaceholder(body, "{{numero}}", quotation.QuotationNumber.ToString());
-        ReplacePlaceholder(body, "{{entrega}}", "3 días hábiles");
-        ReplacePlaceholder(body, "{{validez}}", "7 días");
+        ReplacePlaceholder(body, "{{entrega}}", "3");
+        ReplacePlaceholder(body, "{{validez}}", "7");
         
         var productosParagraph = body.Descendants<Paragraph>()
             .FirstOrDefault(p => p.InnerText.Contains("{{productos}}"));
@@ -256,5 +268,82 @@ public class QuotationService : IQuotationService
             await _quotationUseCase.Commitment();
         }
         return quotation;
+    }
+    
+    public async Task<ShowQuotationDto> ConfirmQuotationAsync(Guid quotationId)
+    {
+        var quotation = await _quotationUseCase.QuotationRepository.GetById(quotationId);
+        if (quotation == null) throw new InvalidOperationException("Cotización no encontrada.");
+
+        var refreshed = await UpdateQuotationStatus(quotationId);
+        if (refreshed.Status == "Vencida")
+            throw new InvalidOperationException("La cotización ha expirado.");
+
+        if (refreshed.Status != "Esperando confirmación")
+            throw new InvalidOperationException("La cotización no está en estado 'Esperando confirmación'.");
+
+        if (refreshed.QuotationDetails == null || !refreshed.QuotationDetails.Any())
+            throw new InvalidOperationException("La cotización no tiene productos.");
+
+        var details = refreshed.QuotationDetails.ToList();
+        var ok = await _quotationUseCase.InventoryRepository.ValidateStockAsync(details);
+        if (!ok) throw new InvalidOperationException("No hay suficiente stock para los productos seleccionados.");
+
+        var adjustments = BuildAdjustmentsFromDetails(details);
+
+        await _quotationUseCase.InventoryRepository.AdjustStockAsync(adjustments);
+
+        var order = new Order
+        {
+            Id = Guid.NewGuid(),
+            QuotationId = refreshed.Id,
+            ConfirmationDate = DateTime.Now,
+            DeliveryDate = DateTime.Now.AddDays(3)
+        };
+        await _quotationUseCase.OrderRepository.Add(order);
+
+        refreshed.Status = "Confirmada";
+        await _quotationUseCase.QuotationRepository.Update(refreshed);
+
+        await _quotationUseCase.Commitment();
+
+        return ShowQuotationDto.FromEntity(refreshed);
+    }
+    
+    private static List<StockAdjustmentDto> BuildAdjustmentsFromDetails(IEnumerable<QuotationDetail> details)
+    {
+        var byMaterial = new Dictionary<Guid, int>();
+
+        foreach (var d in details)
+        {
+            if (d.Product?.UsedMaterials == null || !d.Product.UsedMaterials.Any())
+                continue;
+            
+            if (d.MaterialId == Guid.Empty)
+                continue;
+            
+            var um = d.Product.UsedMaterials
+                .FirstOrDefault(x => x.MaterialId == d.MaterialId);
+            
+            if (um == null)
+            {
+                continue;
+            }
+            
+            var required = (int)Math.Ceiling(
+                (decimal)um.Quantity * d.Quantity / Math.Max(1, d.Product.MinimumQuantity)
+            );
+            
+            if (!byMaterial.ContainsKey(um.MaterialId))
+                byMaterial[um.MaterialId] = 0;
+
+            byMaterial[um.MaterialId] += required;
+        }
+
+        return byMaterial.Select(kv => new StockAdjustmentDto
+        {
+            MaterialId = kv.Key,
+            QuantityToDeduct = kv.Value
+        }).ToList();
     }
 }

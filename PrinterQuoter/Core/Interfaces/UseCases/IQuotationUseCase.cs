@@ -12,4 +12,5 @@ public interface IQuotationUseCase : IBaseUseCase
     IActivityRepository ActivityRepository { get; }
     IProductRepository ProductRepository { get; }
     IMaterialRepository MaterialRepository { get; }
+    IOrderRepository OrderRepository { get; }
 }

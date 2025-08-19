@@ -5,4 +5,5 @@ namespace Core.Interfaces.Services;
 public interface IInventoryService
 {
     Task<InventoryDto> GetInventoryByMaterialIdAsync(Guid materialId);
+    Task<InventoryDto> UpdateInventoryQuantityAsync(Guid materialId, int quantity);
 }
