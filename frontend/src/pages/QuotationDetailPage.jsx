@@ -1,6 +1,6 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState, useMemo } from 'react';
-import { getQuotationById } from '../services/quotationService';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { getQuotationById, requestQuotationConfirmation } from '../services/quotationService';
 import GenericButton from '../components/GenericButton';
 import { FaArrowLeft } from 'react-icons/fa';
 import '../styles/QuotationDetail.scss'
@@ -8,14 +8,75 @@ import { getBadgeClass } from '../utils/quotes';
 
 export default function QuotationDetailPage() {
   const { id } = useParams();
+  const location = useLocation();
 	const navigate = useNavigate();
+
   const [quotation, setQuotation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [requesting, setRequesting] = useState(false);
+  const [banner, setBanner] = useState(null);
+  const [autoRequested, setAutoRequested] = useState(false);
+
+  const fetchQuotation = useCallback(async () => {
+    setLoading(true);
+    try {
+      const q = await getQuotationById(id);
+      setQuotation(q);
+    } catch {
+      alert('No se pudo cargar la cotización');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
-    getQuotationById(id)
-      .then(setQuotation)
-      .catch(() => alert('No se pudo cargar la cotización'));
-  }, [id]);
+    fetchQuotation();
+  }, [fetchQuotation]);
+
+  const mapBackendError = (err) => {
+    const raw = err?.response?.data?.message || '';
+    const msg = String(raw).toLowerCase();
+    if (msg.includes('stock') || msg.includes('inventario') || msg.includes('insuficiente')) {
+      return 'No hay suficiente stock para los productos de la cotización.';
+    }
+    if (msg.includes('expirado') || msg.includes('vencid')) {
+      return 'La cotización ha expirado.';
+    }
+    if (msg.includes('solicitada') || msg.includes('confirm')) {
+      return 'Esta cotización ya tiene una solicitud de confirmación.';
+    }
+    return raw || 'Ocurrió un error al solicitar la confirmación.';
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const shouldRequest = params.get('request') === 'true';
+
+    if (!shouldRequest || autoRequested || !quotation) return;
+
+    const run = async () => {
+      setAutoRequested(true);
+
+      const blocked = ['Vencida', 'Confirmada', 'Esperando confirmación'];
+      if (blocked.includes(quotation.status)) {
+        setBanner({ type: 'error', text: 'No se puede solicitar confirmación para esta cotización.' });
+        return;
+      }
+
+      try {
+        setRequesting(true);
+        await requestQuotationConfirmation(id);
+        setBanner({ type: 'success', text: 'Confirmación solicitada. Estado: Esperando confirmación.' });
+        await fetchQuotation();
+      } catch (err) {
+        setBanner({ type: 'error', text: mapBackendError(err) });
+      } finally {
+        setRequesting(false);
+      }
+    };
+
+    run();
+  }, [location.search, quotation, autoRequested, id, fetchQuotation]);
 
 	const expirationDate = useMemo(() => {
     if (!quotation) return null;
@@ -34,7 +95,7 @@ export default function QuotationDetailPage() {
     return parts.join(' ');
   };
 
-  if (!quotation) return <div className="container py-5">Cargando...</div>;
+  if (loading || !quotation) return <div className="container py-5">Cargando...</div>;
 
 	return (
     <div className="container py-4">
@@ -46,11 +107,18 @@ export default function QuotationDetailPage() {
           size="sm"
           circle
           className="back-button"
+          disabled={requesting}
         />
         <h2>
           Detalle de Cotización <span className="text-body-secondary">#{quotation.quotationNumber}</span>
         </h2>
       </div>
+
+      {banner && (
+        <div className={`alert alert-${banner.type === 'success' ? 'success' : 'danger'} mt-3`} role="alert">
+          {banner.text}
+        </div>
+      )}
 
       <div className="card mb-3">
 				<div className="card-body">
