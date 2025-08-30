@@ -15,20 +15,28 @@ public class WhatsAppService
         );
     }
 
-    public async Task<bool> SendQuotationDocument(string phone, string filePath)
+    public async Task<bool> SendQuotationDocument(string phone, string filePath, Guid quotationId, int quotationNumber)
     {
         try
         {
             var fromNumber = Environment.GetEnvironmentVariable("TWILIO_FROM");
-            var host = Environment.GetEnvironmentVariable("PUBLIC_HOST");
+            var apiHost = Environment.GetEnvironmentVariable("PUBLIC_HOST")?.TrimEnd('/');
+            var webHost = Environment.GetEnvironmentVariable("PUBLIC_WEB_HOST")?.TrimEnd('/');
 
             var fileName = Path.GetFileName(filePath);
-            var mediaUrl = new Uri($"{host}/public/{fileName}");
+            var mediaUrl = new Uri($"{apiHost}/public/{fileName}");
 
+            var confirmUrl = $"{webHost}/home/quotes/{quotationId}?request=true";
+            var catalogUrl = $"{webHost}/home";
+            
             var messageText = 
+                $"Cotización N° *{quotationNumber}*\n\n" +
                 "¡Gracias por solicitar tu cotización con Impresiones Sejas!\n\n" +
                 "Si deseas continuar con el proceso y convertir esta cotización en una orden de trabajo, por favor ingresa a la sección *Historial de cotizaciones* dentro de nuestra aplicación web y selecciona la opción *Solicitar confirmación* en la cotización correspondiente.\n\n" +
                 "Una vez enviada tu solicitud, el administrador se pondrá en contacto contigo para coordinar los últimos detalles y confirmar tu orden.\n\n" +
+                "*Acciones rápidas:*\n" +
+                $"• *Solicitar confirmación*: {confirmUrl}\n" +
+                $"• *Realizar otra cotización*: {catalogUrl}\n\n" +
                 "Si tienes alguna duda adicional o deseas realizar una consulta específica, puedes comunicarte a los números o correo que se encuentran en la cotización que has recibido.";
 
             var result = await MessageResource.CreateAsync(

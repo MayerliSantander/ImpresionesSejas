@@ -107,7 +107,12 @@ public class QuotationController : ControllerBase
                 return BadRequest("Teléfono y productos requeridos.");
 
             var showQuotationDto = await _quotationService.CreateQuotation(request.Bag);
-            var success = await _whatsAppService.SendQuotationDocument(request.Phone, showQuotationDto.DocumentPath);
+            var success = await _whatsAppService.SendQuotationDocument(
+                request.Phone, 
+                showQuotationDto.DocumentPath,
+                showQuotationDto.Id,
+                showQuotationDto.QuotationNumber
+            );
 
             if (!success)
                 return StatusCode(500, "No se pudo enviar el mensaje por WhatsApp.");
