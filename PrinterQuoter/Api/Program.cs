@@ -20,7 +20,7 @@ builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost",
-        builder => builder.WithOrigins("http://localhost:5173", "http://localhost:5174")
+        builder => builder.WithOrigins("http://localhost:5173", "http://localhost:5174", Environment.GetEnvironmentVariable("PUBLIC_WEB_HOST"))
             .AllowAnyMethod()
             .AllowAnyHeader()
         );
