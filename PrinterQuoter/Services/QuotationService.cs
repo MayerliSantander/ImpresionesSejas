@@ -258,13 +258,16 @@ public class QuotationService : IQuotationService
             throw new InvalidOperationException("Cotización no encontrada.");
         }
 
+        if (quotation.Status == "Confirmada")
+        {
+            return quotation;
+        }
+
         var expirationDate = quotation.Date.AddDays(quotation.ValidityDays);
         if (expirationDate < DateTime.Now && quotation.Status != "Vencida")
         {
             quotation.Status = "Vencida";
-        
             await _quotationUseCase.QuotationRepository.Update(quotation); 
-        
             await _quotationUseCase.Commitment();
         }
         return quotation;

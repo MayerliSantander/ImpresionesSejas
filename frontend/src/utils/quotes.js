@@ -8,6 +8,18 @@ export function getBadgeClass(status) {
   }
 }
 
+export function isExpired(quote, now = new Date()) {
+  const exp = new Date(quote.date);
+  exp.setDate(exp.getDate() + quote.validityDays);
+  return exp < now;
+}
+
+export function shouldAutoExpire(quote, now = new Date()) {
+  const terminal = ['Vencida', 'Confirmada'];
+  if (terminal.includes(quote.status)) return false;
+  return isExpired(quote, now);
+}
+
 export function getExpiration(dateStr, validityDays) {
   const d = new Date(dateStr);
   d.setDate(d.getDate() + validityDays);
