@@ -36,6 +36,7 @@ public class AuthenticationController: ControllerBase
             id = user.Id,
             name = user.UserName,
             email = user.Email,
+            phone = user.Phone,
             roles = roles
         });
     }

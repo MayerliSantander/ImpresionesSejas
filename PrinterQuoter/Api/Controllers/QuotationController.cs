@@ -105,7 +105,9 @@ public class QuotationController : ControllerBase
             
             if (string.IsNullOrWhiteSpace(request.Phone) || request.Bag == null || !request.Bag.QuotationDetailDtos.Any()) 
                 return BadRequest("Teléfono y productos requeridos.");
-
+            
+            await _userService.UpdatePhoneAsync(user.Id, request.Phone);
+            
             var showQuotationDto = await _quotationService.CreateQuotation(request.Bag);
             var success = await _whatsAppService.SendQuotationDocument(
                 request.Phone, 
@@ -183,8 +185,19 @@ public class QuotationController : ControllerBase
                 return Unauthorized();
             }
 
-            var result = await _quotationService.ConfirmQuotationAsync(quotationId);
-            return Ok(result);
+            var q = await _quotationService.ConfirmQuotationAsync(quotationId);
+            var owner = await _userService.GetUserById(q.UserId);
+            var phone = owner?.Phone?.Trim();
+            if (!string.IsNullOrWhiteSpace(phone))
+            {
+                _ = _whatsAppService.SendOrderConfirmation(
+                    phone,
+                    q.QuotationNumber,
+                    q.TotalPrice,
+                    user.UserName
+                );
+            }
+            return Ok(q);
         }
         catch (InvalidOperationException ex)
         {
