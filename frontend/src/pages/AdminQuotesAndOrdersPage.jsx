@@ -9,6 +9,7 @@ import QuoteCard from '../components/QuoteCard';
 import OrderCard from '../components/OrderCard';
 import { FiArrowLeft } from 'react-icons/fi';
 import GenericButton from '../components/GenericButton';
+import { shouldAutoExpire } from '../utils/quotes';
 
 function mapBackendError(err) {
   const raw = err?.response?.data?.message || '';
@@ -22,13 +23,7 @@ function mapBackendError(err) {
 }
 
 async function refreshExpiredQuotes(quotes) {
-  const now = new Date();
-  const toExpire = quotes.filter(q => {
-    const exp = new Date(q.date);
-    exp.setDate(exp.getDate() + q.validityDays);
-    return exp < now && q.status !== 'Vencida' && q.status !== 'Confirmada';
-  });
-
+  const toExpire = quotes.filter(q => shouldAutoExpire(q));
   if (toExpire.length === 0) return false;
 
   await Promise.allSettled(toExpire.map(q => updateQuotationStatus(q.id)));

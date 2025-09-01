@@ -6,6 +6,7 @@ import { getUserQuotations, requestQuotationConfirmation, updateQuotationStatus 
 import '../styles/QuotationList.scss'
 import '../styles/_badges.scss'
 import QuoteCard from '../components/QuoteCard';
+import { shouldAutoExpire } from '../utils/quotes';
 
 const SUPPORT_PHONE = import.meta.env.VITE_SUPPORT_PHONE;
 
@@ -24,23 +25,25 @@ export default function QuotationListPage() {
       return;
     }
 
-    getUserQuotations(userId)
-      .then(async (fetchedQuotations) => {
-        for (let quotation of fetchedQuotations) {
-          const expirationDate = new Date(quotation.date);
-          expirationDate.setDate(expirationDate.getDate() + quotation.validityDays);
-          const isExpired = expirationDate < new Date();
-          
-          if (isExpired && quotation.status !== 'Vencida') {
-            await updateQuotationStatus(quotation.id);
-          }
+    (async () => {
+      try {
+        const fetched = await getUserQuotations(userId);
+
+        const toExpire = fetched.filter(q => shouldAutoExpire(q));
+
+        if (toExpire.length > 0) {
+          await Promise.allSettled(toExpire.map(q => updateQuotationStatus(q.id)));
+          const refreshed = await getUserQuotations(userId);
+          setQuotations(refreshed);
+        } else {
+          setQuotations(fetched);
         }
-        setQuotations(fetchedQuotations);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('Error al obtener cotizaciones:', err);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [navigate]);
 
 	const setMsg = (id, type, text) => setCardMsg(prev => ({ ...prev, [id]: { type, text } }));
