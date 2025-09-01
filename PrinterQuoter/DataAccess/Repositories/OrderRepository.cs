@@ -49,4 +49,21 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                     .ThenInclude(d => d.Activities)
             .FirstOrDefaultAsync(p => p.Id == id) ?? throw new InvalidOperationException();
     }
+    
+    public async Task<int> CountByConfirmationDateRangeAsync(DateTime fromInclusive, DateTime toInclusive)
+    {
+        var toExclusive = toInclusive.Date.AddDays(1);
+        return await _context.Orders
+            .CountAsync(o => o.ConfirmationDate >= fromInclusive.Date && o.ConfirmationDate < toExclusive);
+    }
+
+    public async Task<List<Order>> GetByQuotationDateRangeAsync(DateTime fromInclusive, DateTime toInclusive)
+    {
+        var toExclusive = toInclusive.Date.AddDays(1);
+        return await _context.Orders
+            .Include(o => o.Quotation)
+            .Where(o => o.Quotation.Date >= fromInclusive.Date && o.Quotation.Date < toExclusive)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

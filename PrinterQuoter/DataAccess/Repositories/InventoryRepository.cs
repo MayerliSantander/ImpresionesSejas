@@ -83,4 +83,10 @@ public class InventoryRepository: BaseRepository<Inventory>, IInventoryRepositor
             _context.Inventories.Update(inv);
         }
     }
+    
+    public async Task<int> CountBelowOrEqualAsync(int threshold)
+    {
+        return await _context.Inventories
+            .CountAsync(i => i.Quantity <= threshold);
+    }
 }
