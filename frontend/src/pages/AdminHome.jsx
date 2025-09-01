@@ -5,6 +5,7 @@ import {
   FaFileWord,
   FaLayerGroup,
 } from 'react-icons/fa';
+import { BiSolidReport } from "react-icons/bi";
 import '../styles/AdminHome.scss';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,6 +15,7 @@ const items = [
   { label: 'Productos',   icon: <FaBox /> },
   { label: 'Cotizaciones y Ordenes',     icon: <FaClipboardList /> },
   { label: 'Plantilla Cotización', icon: <FaFileWord /> },
+  { label: 'Reportes', icon: <BiSolidReport /> },
 ];
 
 export default function AdminHome() {
@@ -40,6 +42,9 @@ export default function AdminHome() {
               }
               if (label === 'Plantilla Cotización') {
                 navigate('/admin-home/template-upload');
+              }
+              if (label === 'Reportes') {
+                navigate('/admin-home/reports');
               }
             }}
           >
