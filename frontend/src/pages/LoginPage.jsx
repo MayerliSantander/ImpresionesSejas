@@ -37,6 +37,9 @@ export default function LoginPage() {
                 const username = user.name || user.email || 'Usuario';
                 localStorage.setItem('username', username);
                 localStorage.setItem('userId', user.id);
+                if (user.phone) {
+                  localStorage.setItem('userPhone', user.phone);
+                }
                 navigate(role === 'admin' ? '/home' : '/home', { replace: true });
               } else {
                 console.error('El usuario no tiene roles definidos:', user);

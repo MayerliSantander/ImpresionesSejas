@@ -54,4 +54,34 @@ public class WhatsAppService
             return false;
         }
     }
+    
+    public async Task<bool> SendOrderConfirmation(
+        string phone, 
+        int quotationNumber, 
+        decimal total, 
+        string userName)
+    {
+        try
+        {
+            var fromNumber = Environment.GetEnvironmentVariable("TWILIO_FROM");
+
+            var text =
+                $"Hola {userName}, tu *cotización #{quotationNumber}* fue *confirmada* ✅.\n" +
+                $"Total: *Bs. {total:F2}*\n\n" +
+                $"Gracias por tu confianza. ¡Pronto nos pondremos en contacto!";
+
+            var result = await MessageResource.CreateAsync(
+                from: new PhoneNumber("whatsapp:" + fromNumber),
+                to: new PhoneNumber("whatsapp:" + phone),
+                body: text
+            );
+
+            return result.ErrorCode == null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[WhatsApp ERROR]{ex.Message}\n{ex.StackTrace}");
+            return false;
+        }
+    }
 }

@@ -50,6 +50,22 @@ public class UserService: IUserService
         return user;
     }
 
+    public async Task UpdatePhoneAsync(Guid userId, string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) return;
+
+        var u = await _userUseCase.UserRepository.GetById(userId);
+        if (u == null) return;
+
+        var normalized = phone.Trim();
+        if (!string.IsNullOrWhiteSpace(normalized) && u.Phone != normalized)
+        {
+            u.Phone = normalized;
+            await _userUseCase.UserRepository.Update(u);
+            await _userUseCase.Commitment();
+        }
+    }
+    
     public async Task DeleteUser(Guid userId)
     {
         User userToDelete = await _userUseCase.UserRepository.GetById(userId);
