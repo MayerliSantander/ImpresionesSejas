@@ -79,4 +79,31 @@ public class QuotationRepository : BaseRepository<Quotation>, IQuotationReposito
 
         return lastQuotation == null ? 1 : lastQuotation.QuotationNumber + 1;
     }
+    
+    public async Task<IEnumerable<Quotation>> GetByDateRangeAsync(DateTime fromInclusive, DateTime toInclusive)
+    {
+        var toExclusive = toInclusive.Date.AddDays(1);
+        return await _context.Quotations
+            .Where(q => q.Date >= fromInclusive.Date && q.Date < toExclusive)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Quotation>> GetByStatusAndDateRangeAsync(string status, DateTime fromInclusive, DateTime toInclusive)
+    {
+        var toExclusive = toInclusive.Date.AddDays(1);
+        return await _context.Quotations
+            .Where(q => q.Status == status && q.Date >= fromInclusive.Date && q.Date < toExclusive)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Quotation>> GetByIdsAsync(IEnumerable<Guid> ids)
+    {
+        var set = ids?.ToHashSet() ?? new HashSet<Guid>();
+        return await _context.Quotations
+            .Where(q => set.Contains(q.Id))
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

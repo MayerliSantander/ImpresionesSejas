@@ -16,6 +16,7 @@ import QuotationListPage from './pages/QuotationListPage';
 import QuotationDetailPage from './pages/QuotationDetailPage';
 import AdminQuotesAndOrdersPage from './pages/AdminQuotesAndOrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
+import ReportsPage from './pages/ReportsPage';
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
           <Route path='orders' element={<AdminQuotesAndOrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />
           <Route path="quotes/:id" element={<QuotationDetailPage />} />
+          <Route path="reports" element={<ReportsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

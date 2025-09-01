@@ -8,4 +8,5 @@ public interface IInventoryRepository : IBaseRepository<Inventory>
     Task<Inventory> GetByMaterialIdAsync(Guid materialId);
     Task<bool> ValidateStockAsync(List<QuotationDetail> quotationDetails);
     Task AdjustStockAsync(List<StockAdjustmentDto> adjustments);
+    Task<int> CountBelowOrEqualAsync(int threshold);
 }

@@ -37,4 +37,13 @@ public class ProductRepository: BaseRepository<Product>, IProductRepository
             .Include(p => p.Activities)
             .FirstOrDefaultAsync(p => p.Id == id) ?? throw new InvalidOperationException();
     }
+    
+    public async Task<List<Product>> GetByIdsAsync(IEnumerable<Guid> ids)
+    {
+        var set = ids?.ToHashSet() ?? new HashSet<Guid>();
+        return await _context.Products
+            .Where(p => set.Contains(p.Id))
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
