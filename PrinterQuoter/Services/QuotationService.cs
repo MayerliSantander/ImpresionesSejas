@@ -78,7 +78,7 @@ public class QuotationService : IQuotationService
                     }
                 }
                 
-                quotationDetail.Price = SimulatePrice(quotationDetail);
+                quotationDetail.Price = CalculatePrice(quotationDetail);
                 quotation.TotalPrice += quotationDetail.Price;
             }
             catch (Exception e)
@@ -189,9 +189,54 @@ public class QuotationService : IQuotationService
         }
     }
 
-    public decimal SimulatePrice(QuotationDetail quotationDetail)
+    public decimal CalculatePrice(QuotationDetail quotationDetail)
     {
-        return quotationDetail.Quantity * 4;
+        var product = quotationDetail.Product;
+        var productActivities = product.Activities;
+        var material = quotationDetail.Material;
+        var activities = quotationDetail.Activities;
+
+        if (product == null || material == null)
+            throw new InvalidOperationException("Faltan datos de producto o material.");
+
+        int requiredMaterial = 0;
+        var usedMaterial = product.UsedMaterials?.FirstOrDefault(m => m.MaterialId == material.Id);
+        if (usedMaterial != null)
+        {
+            requiredMaterial = (int)Math.Ceiling(
+                (decimal)usedMaterial.Quantity * quotationDetail.Quantity / Math.Max(1, product.MinimumQuantity)
+            );
+        }
+        
+        int totalRequiredMaterial = requiredMaterial + 10;
+
+        decimal materialPrice = (decimal)(totalRequiredMaterial * material.MaterialPrice);
+
+        decimal activitiesPrice = 0;
+        if (activities != null && activities.Any())
+        {
+            activitiesPrice = (decimal)activities.Sum(a => a.Price);
+        }
+        if (productActivities != null && productActivities.Any())
+        {
+            foreach (var activity in productActivities)
+            {
+                if (!(activity.ActivityName.ToLower().StartsWith("acabado") || activity.ActivityName.ToLower().StartsWith("impresión")))
+                {
+                    activitiesPrice += (decimal)activity.Price;
+                }
+            }
+        }
+
+        decimal subtotal = materialPrice + activitiesPrice;
+
+        decimal iva = subtotal * 0.13m;
+        decimal it = subtotal * 0.03m;
+        decimal ganancia = subtotal * 0.08m;
+
+        decimal total = subtotal + iva + it + ganancia;
+
+        return Math.Round(total, 2);
     }
     
     private string FormatProductLine(string name, QuotationDetail quotationDetail)
