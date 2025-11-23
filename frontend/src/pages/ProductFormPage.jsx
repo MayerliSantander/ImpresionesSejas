@@ -183,7 +183,7 @@ export default function ProductFormPage() {
             <FormInput
               label="Tamaño (cm)"
               name="sizeInCm"
-              placeholder="Ej: 9x5" />
+              placeholder="Ej: 9x5cm" />
             <FormInput
               label="Descripción"
               name="description"
@@ -293,7 +293,7 @@ export default function ProductFormPage() {
                         type="number"
                         className={`form-control ${errors.usedMaterials?.[index]?.quantity ? 'is-invalid' : ''}`}
                         min="1"
-                        placeholder="Cantidad"
+                        placeholder="Cantidad (pliegos)"
                         value={values.usedMaterials[index].quantity}
                         onChange={(e) => setFieldValue(`usedMaterials[${index}].quantity`, parseFloat(e.target.value))} />
                       {errors.usedMaterials?.[index]?.quantity && (

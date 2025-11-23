@@ -116,20 +116,20 @@ export default function MaterialFormPage() {
                 placeholder="Ingrese el nombre del material"
 							/>
 							<FormInput
-								label="Precio"
+								label="Precio (Por pliego)"
 								name="materialPrice"
 								type="number"
 								step="0.01"
 								min="0.1"
-                placeholder="Ingrese el precio"
+                placeholder="Ingrese el precio (Bs)"
 							/>
 							<FormInput
-								label="Tamaño"
+								label="Tamaño (cm)"
 								name="size"
-								placeholder="Ingrese el tamaño"
+								placeholder="Ingrese el tamaño (cm)"
 							/>
 							<FormInput
-								label="Tipo"
+								label="Tipo (Gramaje)"
 								name="type"
 								placeholder="Ingrese el tipo"
 							/>

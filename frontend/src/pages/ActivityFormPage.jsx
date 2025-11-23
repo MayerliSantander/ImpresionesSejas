@@ -80,7 +80,7 @@ export default function ActivityFormPage() {
 								type="number"
 								step="0.01"
 								min="0.1"
-                placeholder="Ingrese el precio"
+                placeholder="Ingrese el precio (Bs)"
 							/>
 							{errors.submit && (
                 <div className="alert alert-danger">{errors.submit}</div>
